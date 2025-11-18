@@ -1,0 +1,4 @@
+project_id = "fvtmueqwsihctwwxufbw"
+
+[functions.send-submission-emails]
+verify_jwt = false
