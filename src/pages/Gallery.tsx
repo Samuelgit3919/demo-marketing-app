@@ -105,7 +105,7 @@ const Gallery = () => {
       >
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Our Projects Gallery
+            Our Projects Gallerye
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90 max-w-3xl mx-auto">
             Explore our portfolio of stunning transformations across closets, kitchens, and garages
