@@ -1,21 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, ArrowRight } from "lucide-react";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { NavLink } from "react-router-dom";
 
 export const CTA = () => {
   const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
 
   return (
-    <section 
+    <section
       ref={elementRef as React.RefObject<HTMLElement>}
-      className={`py-24 bg-secondary transition-all duration-1000 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-      }`}
+      className={`py-24 bg-secondary transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`max-w-4xl mx-auto bg-card rounded-3xl p-12 shadow-large border border-border/50 transition-all duration-700 delay-200 ${
-          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        }`}>
+        <div className={`max-w-4xl mx-auto bg-card rounded-3xl p-12 shadow-large border border-border/50 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}>
           <div className="text-center">
             <Calendar className="w-16 h-16 text-accent mx-auto mb-6" />
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -26,10 +25,12 @@ export const CTA = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="accent" className="text-lg group">
-                Schedule Free Consultation
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <NavLink to="/wizard">
+                <Button size="lg" variant="accent" className="text-lg group">
+                  Schedule Free Consultation
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </NavLink>
               <Button size="lg" variant="outline" className="text-lg">
                 Call Us: (555) 123-4567
               </Button>

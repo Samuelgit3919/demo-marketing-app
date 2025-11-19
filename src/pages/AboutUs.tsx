@@ -3,14 +3,22 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, Users, Heart, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 const AboutUs = () => {
+  const heroSection = useIntersectionObserver({ threshold: 0.2 });
+  const storySection = useIntersectionObserver({ threshold: 0.2 });
+  const valuesSection = useIntersectionObserver({ threshold: 0.2 });
+  const ctaSection = useIntersectionObserver({ threshold: 0.2 });
   return (
     <div className="min-h-screen">
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-secondary">
+      <section
+        ref={heroSection.elementRef as React.RefObject<HTMLElement>}
+        className={`pt-32 pb-16 bg-secondary transition-all duration-1000 ${heroSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
@@ -24,7 +32,10 @@ const AboutUs = () => {
       </section>
 
       {/* Our Story */}
-      <section className="py-24 bg-background">
+      <section
+        ref={storySection.elementRef as React.RefObject<HTMLElement>}
+        className={`py-24 bg-background transition-all duration-1000 ${storySection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
@@ -53,7 +64,10 @@ const AboutUs = () => {
       </section>
 
       {/* Our Values */}
-      <section className="py-24 bg-secondary">
+      <section
+        ref={valuesSection.elementRef as React.RefObject<HTMLElement>}
+        className={`py-24 bg-secondary transition-all duration-1000 ${valuesSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-center text-foreground mb-12">
             Our Core Values
@@ -96,7 +110,10 @@ const AboutUs = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-background">
+      <section
+        ref={ctaSection.elementRef as React.RefObject<HTMLElement>}
+        className={`py-24 bg-background transition-all duration-1000 ${ctaSection.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center bg-card rounded-3xl p-12 shadow-large border border-border/50">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -105,7 +122,7 @@ const AboutUs = () => {
             <p className="text-lg text-muted-foreground mb-8">
               Let's transform your space together. Schedule your free consultation today.
             </p>
-            <Link to="/wizard">
+            <Link to="/">
               <Button variant="accent" size="lg" className="text-lg group">
                 Get Started
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />

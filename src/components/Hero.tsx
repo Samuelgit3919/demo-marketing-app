@@ -2,11 +2,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Upload, Ruler, Calendar } from "lucide-react";
 import heroImage from "@/assets/hero-closet.jpg";
 import { Link } from "react-scroll";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { NavLink } from "react-router-dom";
 
 export const Hero = () => {
+  const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
   return (
-    <section className="relative min-h-screen flex items-center">
+    <section
+      ref={elementRef as React.RefObject<HTMLElement>}
+      className="relative min-h-screen flex items-center"
+    >
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -17,8 +22,8 @@ export const Hero = () => {
       />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-3xl">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
+        <div className={`max-w-3xl transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
             Transform Your Space with <span className="text-accent">Custom Design</span>
           </h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
