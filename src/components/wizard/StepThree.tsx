@@ -1,4 +1,4 @@
-"use client"; // Add this at the top if you're using Next.js App Router
+"use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";

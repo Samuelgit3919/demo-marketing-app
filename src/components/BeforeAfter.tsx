@@ -100,7 +100,7 @@ export const BeforeAfter = () => {
             >
               {/* Before Image */}
               <img
-                src={activeProject.before}
+                src={activeProject.after}
                 alt="Before"
                 className="absolute inset-0 w-full h-full object-cover"
               />
@@ -111,7 +111,7 @@ export const BeforeAfter = () => {
                 style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
               >
                 <img
-                  src={activeProject.after}
+                  src={activeProject.before}
                   alt="After"
                   className="absolute inset-0 w-full h-full object-cover"
                 />

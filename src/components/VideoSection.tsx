@@ -49,10 +49,7 @@ export const VideoSection = () => {
 
 
             {/* 
-            
-            
-            <iframe width="1266" height="712" src="https://www.youtube.com/embed/YSZsHwAM5c4" title="Stunning Walk-In Closet Ideas 2025 | Luxury Closet Designs | Chic Storage Solutions" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            
+        
             */}
             {isPlaying && (
               <div className="absolute inset-0 flex items-center justify-center">

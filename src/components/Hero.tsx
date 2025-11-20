@@ -38,11 +38,10 @@ export const Hero = () => {
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </NavLink>
-            <Link
-              to="services"
-              smooth
-              duration={600}
-              offset={-80}
+            <NavLink
+              to="/gallery"
+
+
             >
               <Button
                 size="lg"
@@ -51,7 +50,7 @@ export const Hero = () => {
               >
                 View Our Work
               </Button>
-            </Link>
+            </NavLink>
 
           </div>
 

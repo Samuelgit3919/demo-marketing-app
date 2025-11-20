@@ -122,7 +122,7 @@ const AboutUs = () => {
             <p className="text-lg text-muted-foreground mb-8">
               Let's transform your space together. Schedule your free consultation today.
             </p>
-            <Link to="/">
+            <Link to="/wizard">
               <Button variant="accent" size="lg" className="text-lg group">
                 Get Started
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
