@@ -132,13 +132,12 @@ export const StepTwo = ({
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {spaces.map((space) => (
-              <Card 
-                key={space.id} 
-                className={`p-4 cursor-pointer transition-all ${
-                  activeSpaceId === space.id 
-                    ? "ring-2 ring-primary" 
-                    : "hover:shadow-md"
-                }`}
+              <Card
+                key={space.id}
+                className={`p-4 cursor-pointer transition-all ${activeSpaceId === space.id
+                  ? "ring-2 ring-primary"
+                  : "hover:shadow-md"
+                  }`}
                 onClick={() => setActiveSpaceId(space.id)}
               >
                 <div className="space-y-2">
@@ -209,7 +208,7 @@ export const StepTwo = ({
           {/* Drawing Canvas Section */}
           {activeSpaceId && (
             <Card className="p-6">
-              <DrawingCanvas 
+              <DrawingCanvas
                 spaceId={activeSpaceId}
                 onDrawingComplete={(dataUrl) => handleDrawingComplete(activeSpaceId, dataUrl)}
               />
@@ -224,7 +223,7 @@ export const StepTwo = ({
                   Photos and videos are optional, but the more info you share, the lower the chance of misfit or design errors.
                 </p>
               </div>
-              
+
               <div>
                 <input
                   type="file"
@@ -289,7 +288,7 @@ export const StepTwo = ({
                   Tap in order of most needed.
                 </p>
               </div>
-              
+
               <div className="flex flex-wrap gap-3">
                 {["Hanging", "Drawers", "Shelves"].map((priority) => (
                   <Button

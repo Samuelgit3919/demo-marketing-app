@@ -65,16 +65,14 @@ export const BeforeAfter = () => {
   };
 
   return (
-    <section 
+    <section
       ref={elementRef as React.RefObject<HTMLElement>}
-      className={`py-24 bg-gradient-to-b from-background to-muted/30 transition-all duration-1000 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-      }`}
+      className={`py-24 bg-gradient-to-b from-background to-muted/30 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`text-center mb-16 transition-all duration-700 delay-200 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}>
+        <div className={`text-center mb-16 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Closet <span className="text-accent">Transformations</span>
           </h2>
@@ -84,11 +82,10 @@ export const BeforeAfter = () => {
         </div>
 
         {/* Preview Panel */}
-        <div className={`mb-12 flex justify-center items-center transition-all duration-700 delay-300 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}>
+        <div className={`mb-12 flex justify-center items-center transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}>
           <div className="w-full max-w-4xl rounded-2xl overflow-hidden bg-card shadow-large p-4 transition-all duration-500 hover:shadow-xl">
-            <div 
+            <div
               className="relative rounded-xl overflow-hidden aspect-video cursor-ew-resize select-none"
               onMouseDown={() => setIsDragging(true)}
               onMouseUp={() => setIsDragging(false)}
@@ -104,9 +101,9 @@ export const BeforeAfter = () => {
                 alt="Before"
                 className="absolute inset-0 w-full h-full object-cover"
               />
-              
+
               {/* After Image with clip */}
-              <div 
+              <div
                 className="absolute inset-0 overflow-hidden transition-all duration-100"
                 style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
               >
@@ -118,7 +115,7 @@ export const BeforeAfter = () => {
               </div>
 
               {/* Slider Line */}
-              <div 
+              <div
                 className="absolute top-0 bottom-0 w-1 bg-white shadow-lg"
                 style={{ left: `${sliderPosition}%` }}
               >
@@ -142,9 +139,8 @@ export const BeforeAfter = () => {
         </div>
 
         {/* Horizontal Slider */}
-        <div className={`overflow-hidden transition-all duration-700 delay-500 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`} ref={emblaRef}>
+        <div className={`overflow-hidden transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`} ref={emblaRef}>
           <div className="flex gap-6 px-4 cursor-grab active:cursor-grabbing">
             {projects.map((project) => (
               <div

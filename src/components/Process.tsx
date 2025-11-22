@@ -33,7 +33,7 @@ export const Process = () => {
           }`}>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Our Simple <span className="text-accent">3-Step Process</span>
-          </h2>
+          </h2> 
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             From initial consultation to final installation, we make custom design effortless
           </p>
