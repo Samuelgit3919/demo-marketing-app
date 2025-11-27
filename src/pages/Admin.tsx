@@ -427,6 +427,8 @@ const Admin = () => {
                       </div>
                     )}
 
+
+
                     {submission.additional_notes && (
                       <div>
                         <p className="text-sm font-semibold mb-1">Notes</p>
