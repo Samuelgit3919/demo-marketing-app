@@ -22,7 +22,7 @@ export const Header = () => {
               size="sm"
               onClick={() => navigate("/")}
               className="gap-2"
-            >
+            > 
               <Home className="w-4 h-4" />
               <span className="hidden sm:inline">Home</span>
             </Button>

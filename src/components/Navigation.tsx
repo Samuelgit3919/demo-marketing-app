@@ -95,9 +95,12 @@ export const Navigation = () => {
             >
               About Us
             </NavLink>
-            <Button variant="accent" size="sm" className="w-full mt-2">
-              Get Started
-            </Button>
+
+            <NavLink to="/wizard">
+              <Button variant="accent" size="sm">
+                Get Started
+              </Button>
+            </NavLink>
           </div>
         )}
       </div>

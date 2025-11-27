@@ -26,7 +26,7 @@ const Wizard = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#F3F5F7] py-8 px-4">
+      <div className="min-h-screen bg-[#F3F5F7] py-8 px-1 sm:px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-2">Design & Supply — 3 steps Measurement Wizard</h1>
@@ -34,7 +34,7 @@ const Wizard = () => {
 
           <ProgressBar currentStep={currentStep} totalSteps={3} />
 
-          <Card className="p-8 md:p-12 shadow-card">
+          <Card className="p-4 md:p-12 shadow-card">
             {currentStep === 0 && (
               <StepOne
                 formData={formData}

@@ -98,12 +98,12 @@ export const StepTwo = ({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-3 md:space-y-6 animate-in fade-in duration-500">
       {/* Add Spaces Section */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Add your spaces</h2>
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h2 className="text-xl md:text-2xl font-semibold">Add your spaces</h2>
+          <div className="flex items-center gap-3 md:gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Units</span>
               <Select value={unit} onValueChange={(value: "cm" | "in") => setUnit(value)}>
@@ -116,7 +116,7 @@ export const StepTwo = ({
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={addSpace} variant="default" size="sm">
+            <Button onClick={addSpace} variant="default" size="sm" className="flex-1 md:flex-initial">
               <Plus className="w-4 h-4 mr-2" />
               Add space
             </Button>
@@ -124,13 +124,13 @@ export const StepTwo = ({
         </div>
 
         {spaces.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">
+          <Card className="p-6 md:p-8 text-center">
+            <p className="text-muted-foreground text-sm md:text-base">
               No spaces yet. Click <span className="font-semibold">+ Add space</span> to begin.
             </p>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {spaces.map((space) => (
               <Card
                 key={space.id}
@@ -169,9 +169,9 @@ export const StepTwo = ({
         <>
           {/* Space Details Section */}
           {activeSpaceId && (
-            <Card className="p-6">
-              <h3 className="font-semibold text-lg mb-4">Space details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="p-2 md:p-6">
+              <h3 className="font-semibold text-base md:text-lg mb-4">Space details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
                   <Label>Space name</Label>
                   <Input
@@ -190,14 +190,15 @@ export const StepTwo = ({
                   />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-muted-foreground">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mt-4">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Active space: {spaces.find(s => s.id === activeSpaceId)?.name || ""}
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => removeSpace(activeSpaceId)}
+                  className="w-full md:w-auto"
                 >
                   Delete this space
                 </Button>
@@ -207,19 +208,20 @@ export const StepTwo = ({
 
           {/* Drawing Canvas Section */}
           {activeSpaceId && (
-            <Card className="p-6">
+            <Card className="p-3 md:p-6 overflow-x-auto">
               <DrawingCanvas
                 spaceId={activeSpaceId}
+                unit={unit}
                 onDrawingComplete={(dataUrl) => handleDrawingComplete(activeSpaceId, dataUrl)}
               />
             </Card>
           )}
 
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-2">Photos & videos (optional)</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="font-semibold text-base md:text-lg mb-2">Photos & videos (optional)</h3>
+                <p className="text-xs md:text-sm text-muted-foreground mb-4">
                   Photos and videos are optional, but the more info you share, the lower the chance of misfit or design errors.
                 </p>
               </div>
@@ -235,14 +237,14 @@ export const StepTwo = ({
                 />
                 <Label
                   htmlFor="file-upload"
-                  className="flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-lg p-12 cursor-pointer hover:bg-muted/50 transition-all hover:border-primary/50"
+                  className="flex flex-col items-center justify-center gap-2 md:gap-3 border-2 border-dashed rounded-lg p-6 md:p-12 cursor-pointer hover:bg-muted/50 transition-all hover:border-primary/50"
                 >
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-primary" />
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Upload className="w-6 h-6 md:w-8 md:h-8 text-primary" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium">Click to upload files</p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="font-medium text-sm md:text-base">Click to upload files</p>
+                    <p className="text-xs md:text-sm text-muted-foreground mt-1">
                       Images and videos up to 20MB
                     </p>
                   </div>
@@ -280,16 +282,16 @@ export const StepTwo = ({
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-2">Storage priorities</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="font-semibold text-base md:text-lg mb-2">Storage priorities</h3>
+                <p className="text-xs md:text-sm text-muted-foreground mb-4">
                   Tap in order of most needed.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 md:gap-3">
                 {["Hanging", "Drawers", "Shelves"].map((priority) => (
                   <Button
                     key={priority}
@@ -317,11 +319,11 @@ export const StepTwo = ({
         </>
       )}
 
-      <div className="flex justify-between pt-6">
-        <Button variant="outline" onClick={onBack} size="lg">
+      <div className="flex justify-between gap-3 pt-6">
+        <Button variant="outline" onClick={onBack} size="lg" className="flex-1 md:flex-initial">
           Back
         </Button>
-        <Button onClick={handleNext} size="lg" className="px-8">
+        <Button onClick={handleNext} size="lg" className="flex-1 md:flex-initial md:px-8">
           Next
         </Button>
       </div>

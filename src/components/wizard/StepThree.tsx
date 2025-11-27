@@ -157,7 +157,7 @@ export const StepThree = ({
         </p>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-4">
         <h3 className="font-semibold text-lg mb-6">Choose Your Meeting Time</h3>
 
         {calendlyEventScheduled ? (

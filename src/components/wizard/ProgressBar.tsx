@@ -17,8 +17,8 @@ export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
               index < currentStep
                 ? "bg-primary"
                 : index === currentStep
-                ? "bg-primary"
-                : "bg-muted"
+                  ? "bg-primary"
+                  : "bg-muted"
             )}
           />
         ))}

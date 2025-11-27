@@ -20,12 +20,12 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-500">
+    <form onSubmit={handleSubmit} className="space-y-3 md:space-y-6 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Tell us about you</h2>
+        <h2 className="text-xl md:text-2xl font-semibold mb-2">Tell us about you</h2>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
         <div className="space-y-2">
           <Label htmlFor="fullName">Full name *</Label>
           <Input
@@ -37,7 +37,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
             className="h-12"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="email">Email *</Label>
           <Input
@@ -50,7 +50,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
             className="h-12"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="phone">Phone</Label>
           <Input
@@ -62,7 +62,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
             className="h-12"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="postalCode">Postal/ZIP *</Label>
           <Input
@@ -75,9 +75,9 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
           />
         </div>
       </div>
-      
-      <div className="flex justify-end pt-6">
-        <Button type="submit" size="lg" className="px-8">
+
+      <div className="flex justify-end pt-4 md:pt-6">
+        <Button type="submit" size="lg" className="w-full sm:w-auto sm:px-8">
           Next
         </Button>
       </div>
