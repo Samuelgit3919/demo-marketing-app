@@ -16,6 +16,10 @@ interface Space {
   type: string;
   ceilingHeight: string;
   drawingData?: string;
+  wallMeasurements?: Array<{ label: string; length: string }>;
+  unit?: "cm" | "in";
+  totalPerimeter?: number;
+  totalArea?: number;
 }
 
 interface StepTwoProps {
@@ -62,8 +66,28 @@ export const StepTwo = ({
     setSpaces(spaces.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
-  const handleDrawingComplete = (spaceId: string, dataUrl: string) => {
-    updateSpace(spaceId, "drawingData", dataUrl);
+  const handleDrawingComplete = (
+    spaceId: string,
+    dataUrl: string,
+    wallMeasurements: Array<{ label: string; length: string }>,
+    totalPerimeter: number,
+    totalArea: number
+  ) => {
+    const space = spaces.find(s => s.id === spaceId);
+    if (space) {
+      setSpaces(spaces.map((s) =>
+        s.id === spaceId
+          ? {
+            ...s,
+            drawingData: dataUrl,
+            wallMeasurements,
+            unit,
+            totalPerimeter,
+            totalArea
+          }
+          : s
+      ));
+    }
   };
 
   const removeSpace = (id: string) => {
@@ -169,7 +193,7 @@ export const StepTwo = ({
         <>
           {/* Space Details Section */}
           {activeSpaceId && (
-            <Card className="p-2 md:p-6">
+            <Card className="p-4 md:p-6">
               <h3 className="font-semibold text-base md:text-lg mb-4">Space details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
@@ -212,7 +236,9 @@ export const StepTwo = ({
               <DrawingCanvas
                 spaceId={activeSpaceId}
                 unit={unit}
-                onDrawingComplete={(dataUrl) => handleDrawingComplete(activeSpaceId, dataUrl)}
+                onDrawingComplete={(dataUrl, wallMeasurements, totalPerimeter, totalArea) =>
+                  handleDrawingComplete(activeSpaceId, dataUrl, wallMeasurements, totalPerimeter, totalArea)
+                }
               />
             </Card>
           )}

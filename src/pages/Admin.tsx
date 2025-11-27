@@ -350,7 +350,7 @@ const Admin = () => {
                                 <div className="bg-muted px-3 py-2">
                                   <p className="text-sm font-medium">{space.name || `Space ${index + 1}`}</p>
                                   <p className="text-xs text-muted-foreground">
-                                    {space.type} • Ceiling: {space.ceilingHeight || 'N/A'}
+                                    {space.type} • Ceiling: {space.ceilingHeight || 'N/A'} {space.unit || 'cm'}
                                   </p>
                                 </div>
                                 <div className="p-2 bg-white">
@@ -360,7 +360,39 @@ const Admin = () => {
                                     className="w-full h-auto rounded"
                                   />
                                 </div>
-                                <div className="px-3 py-2 flex justify-end">
+
+                                {/* Wall Measurements */}
+                                {space.wallMeasurements && space.wallMeasurements.length > 0 && (
+                                  <div className="px-3 py-3 bg-muted/50 border-t">
+                                    <p className="text-xs font-semibold mb-2 text-foreground">Wall Measurements ({space.unit || 'cm'})</p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                      {space.wallMeasurements.map((wall: any, wallIndex: number) => (
+                                        <div key={wallIndex} className="flex items-center gap-1 text-xs">
+                                          <span className="font-semibold text-primary">Wall {wall.label}:</span>
+                                          <span className="text-foreground">{wall.length || '—'} {space.unit || 'cm'}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {space.totalPerimeter > 0 && (
+                                      <div className="mt-3 pt-2 border-t border-border">
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                          <div className="flex items-center gap-1 text-xs">
+                                            <span className="font-semibold text-muted-foreground">Total Perimeter:</span>
+                                            <span className="font-bold text-primary">{space.totalPerimeter.toFixed(2)} {space.unit || 'cm'}</span>
+                                          </div>
+                                          {space.totalArea > 0 && (
+                                            <div className="flex items-center gap-1 text-xs">
+                                              <span className="font-semibold text-muted-foreground">Estimated Area:</span>
+                                              <span className="font-bold text-primary">{space.totalArea.toFixed(2)} {space.unit || 'cm'}²</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="px-3 py-2 flex justify-end border-t">
                                   <Button
                                     size="sm"
                                     variant="ghost"

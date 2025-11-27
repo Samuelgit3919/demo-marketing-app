@@ -82,58 +82,56 @@ export const StepThree = ({
       // Upload files
       const fileUrls: string[] = [];
       for (const file of files) {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${formData.email}/${fileName}`;
 
-        const { error } = await supabase.storage
-          .from('submission-files')
-          .upload(filePath, file);
+        const { error } = await supabase.storage.from("submission-files").upload(filePath, file);
 
         if (error) throw error;
         fileUrls.push(filePath);
       }
 
       // Insert submission
-      const { error: insertError } = await supabase
-        .from('submissions')
-        .insert({
-          full_name: editedFormData.fullName,
-          email: editedFormData.email,
-          phone: editedFormData.phone,
-          postal_code: editedFormData.postalCode,
-          spaces,
-          storage_priorities: storagePriorities,
-          additional_notes: additionalNotes,
-          calendly_event_url: calendlyEventUrl,
-          calendly_booking_time: calendlyBookingTime,
-          file_paths: fileUrls,
-          status: 'pending'
-        });
+      const { error: insertError } = await supabase.from("submissions").insert({
+        full_name: editedFormData.fullName,
+        email: editedFormData.email,
+        phone: editedFormData.phone,
+        postal_code: editedFormData.postalCode,
+        spaces,
+        storage_priorities: storagePriorities,
+        additional_notes: additionalNotes,
+        calendly_event_url: calendlyEventUrl,
+        calendly_booking_time: calendlyBookingTime,
+        file_paths: fileUrls,
+        status: "pending",
+      });
 
       if (insertError) throw insertError;
 
       // Send emails
-      await supabase.functions.invoke('send-submission-emails', {
-        body: {
-          clientEmail: editedFormData.email,
-          clientName: editedFormData.fullName,
-          adminEmail: 'admin@yourcompany.com',
-          submissionData: {
-            fullName: editedFormData.fullName,
-            email: editedFormData.email,
-            phone: editedFormData.phone,
-            postalCode: editedFormData.postalCode,
-            spaces,
-            storagePriorities,
-            additionalNotes,
-            calendlyEventUrl,
-            calendlyBookingTime: new Date(calendlyBookingTime).toLocaleString(),
-          }
-        }
-      }).catch(() => {
-        toast.warning("Submission saved, but email failed to send.");
-      });
+      await supabase.functions
+        .invoke("send-submission-emails", {
+          body: {
+            clientEmail: editedFormData.email,
+            clientName: editedFormData.fullName,
+            adminEmail: "admin@yourcompany.com",
+            submissionData: {
+              fullName: editedFormData.fullName,
+              email: editedFormData.email,
+              phone: editedFormData.phone,
+              postalCode: editedFormData.postalCode,
+              spaces,
+              storagePriorities,
+              additionalNotes,
+              calendlyEventUrl,
+              calendlyBookingTime: new Date(calendlyBookingTime).toLocaleString(),
+            },
+          },
+        })
+        .catch(() => {
+          toast.warning("Submission saved, but email failed to send.");
+        });
 
       toast.success("Submission complete! Check your email for confirmation.");
       onComplete();
@@ -152,9 +150,7 @@ export const StepThree = ({
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h2 className="text-2xl font-semibold mb-2">Schedule Your Free Consultation</h2>
-        <p className="text-muted-foreground">
-          Book a convenient time for your design consultation below.
-        </p>
+        <p className="text-muted-foreground">Book a convenient time for your design consultation below.</p>
       </div>
 
       <Card className="p-4">
@@ -210,73 +206,133 @@ export const StepThree = ({
       </Card>
 
       {/* Submission Summary Card */}
-      <Card className="p-6">
-        <div className="space-y-4">
+      <Card className="p-4 md:p-6">
+        <div className="space-y-4 md:space-y-6">
           <div>
-            <h3 className="font-semibold text-lg">Submission Summary</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold text-lg md:text-xl">Submission Summary</h3>
+            <p className="text-sm md:text-base text-muted-foreground mt-1">
               Review your details. You can edit any field before submitting.
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
-            <div className="grid grid-cols-3 gap-4 pb-2 border-b font-medium text-sm text-muted-foreground">
+          <div className="space-y-4 pt-2">
+            <div className="hidden md:grid grid-cols-3 gap-4 pb-2 border-b font-medium text-sm text-muted-foreground">
               <div>Field</div>
               <div className="col-span-2">Value</div>
             </div>
 
             {/* Repeat this pattern for editable fields */}
-            {['fullName', 'email', 'phone', 'postalCode'].map((field) => (
-              <div key={field} className="grid grid-cols-3 gap-4 items-center">
-                <div className="text-sm font-medium capitalize">
-                  {field === 'postalCode' ? 'Postal Code' : field.replace(/([A-Z])/g, ' $1').trim()}
+            {["fullName", "email", "phone", "postalCode"].map((field) => (
+              <div key={field} className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 items-start md:items-center pb-3 md:pb-0 border-b md:border-b-0">
+                <div className="text-sm md:text-base font-semibold md:font-medium capitalize text-foreground">
+                  {field === "postalCode" ? "Postal Code" : field.replace(/([A-Z])/g, " $1").trim()}
                 </div>
                 {editingField === field ? (
-                  <div className="col-span-2 flex gap-2">
+                  <div className="w-full md:col-span-2 flex gap-2">
                     <Input
                       value={editedFormData[field]}
                       onChange={(e) => setEditedFormData({ ...editedFormData, [field]: e.target.value })}
+                      className="text-sm md:text-base"
                     />
-                    <Button size="icon" variant="ghost" onClick={handleSaveEdit}>
-                      <Check className="w-4 h-4" />
+                    <Button size="icon" variant="ghost" onClick={handleSaveEdit} className="shrink-0 h-9 w-9 md:h-10 md:w-10">
+                      <Check className="w-5 h-5 md:w-4 md:h-4 text-green-600" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={handleCancelEdit}>
-                      <X className="w-4 h-4" />
+                    <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="shrink-0 h-9 w-9 md:h-10 md:w-10">
+                      <X className="w-5 h-5 md:w-4 md:h-4 text-red-600" />
                     </Button>
                   </div>
                 ) : (
-                  <>
-                    <div className="text-sm">{editedFormData[field] || "—"}</div>
+                  <div className="w-full md:col-span-2 flex justify-between items-center gap-3">
+                    <div className="text-sm md:text-base text-foreground break-all">{editedFormData[field] || "—"}</div>
                     <Button
                       size="icon"
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => handleEdit(field)}
+                      className="shrink-0 h-8 w-8 md:h-9 md:w-9 hover:bg-primary hover:text-primary-foreground transition-colors"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
+                      <Pencil className="w-4 h-4" />
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             ))}
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-sm font-medium">Spaces</div>
-              <div className="col-span-2 text-sm">{spaces.length} space(s)</div>
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 pt-2">
+              <div className="text-sm md:text-base font-semibold md:font-medium text-foreground">Spaces</div>
+              <div className="md:col-span-2 text-sm md:text-base text-foreground">{spaces.length} space(s)</div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-sm font-medium">Storage Priorities</div>
-              <div className="col-span-2 text-sm">
+
+            {/* Space Details with Wall Measurements */}
+            {spaces.length > 0 && (
+              <div className="flex flex-col gap-4 pt-2 border-t">
+                <div className="text-sm md:text-base font-semibold text-foreground">Space Details</div>
+                {spaces.map((space, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-muted/30 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div>
+                        <h4 className="font-semibold text-sm md:text-base text-foreground">
+                          {space.name || `Space ${index + 1}`}
+                        </h4>
+                        <p className="text-xs md:text-sm text-muted-foreground">
+                          {space.type} • Ceiling: {space.ceilingHeight || 'N/A'} {space.unit || 'cm'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Wall Measurements */}
+                    {space.wallMeasurements && space.wallMeasurements.length > 0 && (
+                      <div className="space-y-3 pt-2 border-t">
+                        <p className="text-xs md:text-sm font-semibold text-foreground">
+                          Wall Measurements ({space.unit || 'cm'})
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                          {space.wallMeasurements.map((wall: any, wallIndex: number) => (
+                            <div key={wallIndex} className="flex items-center gap-1 text-xs md:text-sm">
+                              <span className="font-semibold text-primary">Wall {wall.label}:</span>
+                              <span className="text-foreground">{wall.length || '—'} {space.unit || 'cm'}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Total Perimeter and Area */}
+                        {space.totalPerimeter > 0 && (
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 border-t">
+                            <div className="flex items-center gap-1 text-xs md:text-sm">
+                              <span className="font-semibold text-muted-foreground">Total Perimeter:</span>
+                              <span className="font-bold text-primary">
+                                {space.totalPerimeter.toFixed(2)} {space.unit || 'cm'}
+                              </span>
+                            </div>
+                            {space.totalArea > 0 && (
+                              <div className="flex items-center gap-1 text-xs md:text-sm">
+                                <span className="font-semibold text-muted-foreground">Estimated Area:</span>
+                                <span className="font-bold text-primary">
+                                  {space.totalArea.toFixed(2)} {space.unit || 'cm'}²
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4">
+              <div className="text-sm md:text-base font-semibold md:font-medium text-foreground">Storage Priorities</div>
+              <div className="md:col-span-2 text-sm md:text-base text-foreground">
                 {storagePriorities.length ? storagePriorities.join(", ") : "None"}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-sm font-medium">Files</div>
-              <div className="col-span-2 text-sm">{files.length} file(s) uploaded</div>
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4">
+              <div className="text-sm md:text-base font-semibold md:font-medium text-foreground">Files</div>
+              <div className="md:col-span-2 text-sm md:text-base text-foreground">{files.length} file(s) uploaded</div>
             </div>
             {additionalNotes && (
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-sm font-medium">Notes</div>
-                <div className="col-span-2 text-sm">{additionalNotes}</div>
+              <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4">
+                <div className="text-sm md:text-base font-semibold md:font-medium text-foreground">Notes</div>
+                <div className="md:col-span-2 text-sm md:text-base text-foreground break-words">{additionalNotes}</div>
               </div>
             )}
           </div>
@@ -287,12 +343,7 @@ export const StepThree = ({
         <Button variant="outline" onClick={onBack} size="lg" disabled={submitting}>
           Back
         </Button>
-        <Button
-          onClick={handleFinish}
-          size="lg"
-          className="px-10"
-          disabled={submitting || !calendlyEventScheduled}
-        >
+        <Button onClick={handleFinish} size="lg" className="px-10" disabled={submitting || !calendlyEventScheduled}>
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
