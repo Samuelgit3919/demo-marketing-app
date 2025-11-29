@@ -3,6 +3,7 @@ import { ArrowRight, Upload, Ruler, Calendar } from "lucide-react";
 import heroImage from "@/assets/hero-closet.jpg";
 import { Link } from "react-scroll";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { NavLink } from "react-router-dom";
 
 export const Hero = () => {
   const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
@@ -31,10 +32,12 @@ export const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-8 md:mb-12">
-            <Button size="lg" variant="accent" className="text-base md:text-lg group w-full sm:w-auto">
-              Get Free Consultation
-              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <NavLink to="/wizard">
+              <Button size="lg" variant="accent" className="text-base md:text-lg group w-full sm:w-auto">
+                Get Free Consultation
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </NavLink>
             <Link
               to="services"
               smooth

@@ -144,34 +144,36 @@ export const StepThree = ({
   };
 
   // Calendly URL with prefill
-  const calendlyUrl = `https://calendly.com/saminew3919/30min`;
+  const calendlyUrl = `https://calendly.com/samishambu39/30min`;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-2xl font-semibold mb-2">Schedule Your Free Consultation</h2>
-        <p className="text-muted-foreground">Book a convenient time for your design consultation below.</p>
+    <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
+      <div className="px-1">
+        <h2 className="text-xl md:text-2xl font-semibold mb-1 md:mb-2">Schedule Your Free Consultation</h2>
+        <p className="text-sm md:text-base text-muted-foreground">Book a convenient time for your design consultation below.</p>
       </div>
 
-      <Card className="p-4">
-        <h3 className="font-semibold text-lg mb-6">Choose Your Meeting Time</h3>
+      <Card className="p-3 md:p-4">
+        <h3 className="font-semibold text-base md:text-lg mb-4 md:mb-6">Choose Your Meeting Time</h3>
 
         {calendlyEventScheduled ? (
-          <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-8 text-center">
-            <div className="text-6xl mb-4">Checkmark</div>
-            <h4 className="font-semibold text-2xl text-green-900 dark:text-green-100 mb-3">
+          <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4 md:p-8 text-center">
+            <div className="text-4xl md:text-6xl mb-3 md:mb-4">✓</div>
+            <h4 className="font-semibold text-lg md:text-2xl text-green-900 dark:text-green-100 mb-2 md:mb-3">
               Meeting Scheduled Successfully!
             </h4>
-            <p className="text-green-800 dark:text-green-200 mb-6 max-w-md mx-auto">
+            <p className="text-sm md:text-base text-green-800 dark:text-green-200 mb-4 md:mb-6 max-w-md mx-auto">
               Your consultation has been booked. You can now submit your design request.
             </p>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => {
                 setCalendlyEventScheduled(false);
                 setCalendlyEventUrl("");
                 setCalendlyBookingTime("");
               }}
+              className="md:size-default"
             >
               Reschedule Meeting
             </Button>
@@ -187,18 +189,18 @@ export const StepThree = ({
                     name: formData.fullName,
                   }}
                   styles={{
-                    height: "680px",
+                    height: window.innerWidth < 768 ? "500px" : "680px",
                     width: "100%",
                   }}
                 />
               </div>
             ) : (
-              <div className="h-96 bg-gray-100 border-2 border-dashed rounded-lg flex items-center justify-center">
-                <p className="text-muted-foreground">Loading calendar...</p>
+              <div className="h-64 md:h-96 bg-gray-100 border-2 border-dashed rounded-lg flex items-center justify-center">
+                <p className="text-sm md:text-base text-muted-foreground">Loading calendar...</p>
               </div>
             )}
 
-            <p className="text-sm text-muted-foreground mt-6 text-center">
+            <p className="text-xs md:text-sm text-muted-foreground mt-4 md:mt-6 text-center px-2">
               Please schedule a meeting above before submitting your request.
             </p>
           </>
@@ -339,11 +341,23 @@ export const StepThree = ({
         </div>
       </Card>
 
-      <div className="flex justify-between pt-8">
-        <Button variant="outline" onClick={onBack} size="lg" disabled={submitting}>
+      {/* Navigation Buttons */}
+      <div className="flex justify-between pt-4">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          size="lg"
+          disabled={submitting}
+          className="animate-pulse"
+        >
           Back
         </Button>
-        <Button onClick={handleFinish} size="lg" className="px-10" disabled={submitting || !calendlyEventScheduled}>
+        <Button
+          onClick={handleFinish}
+          size="lg"
+          className={`px-10 ${calendlyEventScheduled && !submitting ? 'animate-pulse' : ''}`}
+          disabled={submitting || !calendlyEventScheduled}
+        >
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

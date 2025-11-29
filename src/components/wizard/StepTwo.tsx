@@ -51,11 +51,12 @@ export const StepTwo = ({
   const [activeSpaceId, setActiveSpaceId] = useState<string>("");
 
   const addSpace = () => {
+    const defaultCeiling = unit === "cm" ? "244" : "96";
     const newSpace: Space = {
       id: crypto.randomUUID(),
       name: `Space ${spaces.length + 1}`,
       type: "Walk-in Closet",
-      ceilingHeight: "",
+      ceilingHeight: defaultCeiling,
       drawingData: "",
     };
     setSpaces([...spaces, newSpace]);
@@ -106,11 +107,53 @@ export const StepTwo = ({
   };
 
   const togglePriority = (priority: string) => {
-    if (storagePriorities.includes(priority)) {
-      setStoragePriorities(storagePriorities.filter((p) => p !== priority));
-    } else {
+    const currentIndex = storagePriorities.indexOf(priority);
+
+    if (currentIndex === -1) {
+      // Add priority
       setStoragePriorities([...storagePriorities, priority]);
+    } else {
+      // Remove priority
+      setStoragePriorities(storagePriorities.filter((p) => p !== priority));
     }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    const index = storagePriorities.indexOf(priority);
+    if (index === -1) return 'bg-red-500 hover:bg-red-600 text-white'; // Unselected
+    if (index === 0) return 'bg-green-500 hover:bg-green-600 text-white'; // First priority
+    if (index === 1) return 'bg-yellow-500 hover:bg-yellow-600 text-white'; // Second priority
+    return 'bg-red-500 hover:bg-red-600 text-white'; // Third or more
+  };
+
+  const isFormValid = () => {
+    if (spaces.length === 0) return false;
+
+    // Validate each space
+    for (const space of spaces) {
+      // Check space name is not empty
+      if (!space.name || space.name.trim() === "") {
+        return false;
+      }
+
+      // Check ceiling height is greater than 0
+      const ceilingHeight = parseFloat(space.ceilingHeight);
+      if (!ceilingHeight || ceilingHeight <= 0) {
+        return false;
+      }
+
+      // Check all wall measurements are filled and greater than 0
+      if (space.wallMeasurements && space.wallMeasurements.length > 0) {
+        for (const wall of space.wallMeasurements) {
+          const length = parseFloat(wall.length);
+          if (!wall.length || wall.length.trim() === "" || !length || length <= 0) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
   };
 
   const handleNext = () => {
@@ -118,6 +161,31 @@ export const StepTwo = ({
       toast.error("Please add at least one space");
       return;
     }
+
+    // Find the first invalid space and show specific error
+    for (const space of spaces) {
+      if (!space.name || space.name.trim() === "") {
+        toast.error(`Please enter a name for "${space.name || 'the space'}"`);
+        return;
+      }
+
+      const ceilingHeight = parseFloat(space.ceilingHeight);
+      if (!ceilingHeight || ceilingHeight <= 0) {
+        toast.error(`Please enter ceiling height for "${space.name}"`);
+        return;
+      }
+
+      if (space.wallMeasurements && space.wallMeasurements.length > 0) {
+        for (const wall of space.wallMeasurements) {
+          const length = parseFloat(wall.length);
+          if (!wall.length || wall.length.trim() === "" || !length || length <= 0) {
+            toast.error(`Please fill all wall measurements for "${space.name}"`);
+            return;
+          }
+        }
+      }
+    }
+
     onNext();
   };
 
@@ -126,7 +194,10 @@ export const StepTwo = ({
       {/* Add Spaces Section */}
       <div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h2 className="text-xl md:text-2xl font-semibold">Add your spaces</h2>
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold">Add your spaces</h2>
+            <p className="text-sm text-muted-foreground mt-1">CLOSETS / KITCHEN / GARAGE</p>
+          </div>
           <div className="flex items-center gap-3 md:gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Units</span>
@@ -174,6 +245,7 @@ export const StepTwo = ({
                         e.stopPropagation();
                         removeSpace(space.id);
                       }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -197,20 +269,27 @@ export const StepTwo = ({
               <h3 className="font-semibold text-base md:text-lg mb-4">Space details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
-                  <Label>Space name</Label>
+                  <Label>Space name *</Label>
                   <Input
                     value={spaces.find(s => s.id === activeSpaceId)?.name || ""}
                     onChange={(e) => updateSpace(activeSpaceId, "name", e.target.value)}
                     placeholder="Space 1"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Ceiling height ({unit})</Label>
+                  <Label>Ceiling height ({unit}) *</Label>
                   <Input
                     type="number"
                     value={spaces.find(s => s.id === activeSpaceId)?.ceilingHeight || ""}
-                    onChange={(e) => updateSpace(activeSpaceId, "ceilingHeight", e.target.value)}
-                    placeholder={unit === "cm" ? "240" : "96"}
+                    onChange={(e) => {
+                      const value = Math.max(0, parseFloat(e.target.value) || 0);
+                      updateSpace(activeSpaceId, "ceilingHeight", value.toString());
+                    }}
+                    placeholder={unit === "cm" ? "244" : "96"}
+                    min="0"
+                    step="1"
+                    required
                   />
                 </div>
               </div>
@@ -222,8 +301,9 @@ export const StepTwo = ({
                   variant="outline"
                   size="sm"
                   onClick={() => removeSpace(activeSpaceId)}
-                  className="w-full md:w-auto"
+                  className="w-full md:w-auto text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50"
                 >
+                  <X className="w-4 h-4 mr-2" />
                   Delete this space
                 </Button>
               </div>
@@ -321,11 +401,13 @@ export const StepTwo = ({
                 {["Hanging", "Drawers", "Shelves"].map((priority) => (
                   <Button
                     key={priority}
-                    variant={storagePriorities.includes(priority) ? "default" : "outline"}
                     onClick={() => togglePriority(priority)}
                     type="button"
+                    className={getPriorityColor(priority)}
                   >
                     {priority}
+                    {storagePriorities.indexOf(priority) === 0 && " (1st)"}
+                    {storagePriorities.indexOf(priority) === 1 && " (2nd)"}
                   </Button>
                 ))}
               </div>
@@ -345,11 +427,22 @@ export const StepTwo = ({
         </>
       )}
 
-      <div className="flex justify-between gap-3 pt-6">
-        <Button variant="outline" onClick={onBack} size="lg" className="flex-1 md:flex-initial">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between pt-4">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          size="lg"
+          className="animate-pulse"
+        >
           Back
         </Button>
-        <Button onClick={handleNext} size="lg" className="flex-1 md:flex-initial md:px-8">
+        <Button
+          onClick={handleNext}
+          size="lg"
+          className={`px-8 ${isFormValid() ? 'animate-pulse' : ''}`}
+          disabled={!isFormValid()}
+        >
           Next
         </Button>
       </div>
