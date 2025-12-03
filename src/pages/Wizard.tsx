@@ -5,8 +5,6 @@ import { StepTwo } from "@/components/wizard/StepTwo";
 import { StepThree } from "@/components/wizard/StepThree";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(() => {
@@ -100,10 +98,10 @@ const Wizard = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-background py-2 md:py-8 px-1 md:px-4 pb-24">
+      <div className="min-h-screen bg-background py-2 md:py-8 px-1 md:px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-6 md:mb-12 px-2">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">Design & Supply — 3 steps Measurement Wizard</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">3 Steps Measurement Wizard</h1>
           </div>
 
           <ProgressBar currentStep={currentStep} totalSteps={3} />
@@ -145,33 +143,6 @@ const Wizard = () => {
             )}
           </Card>
         </div>
-
-        {/* Floating Navigation Buttons */}
-        {/* <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t shadow-lg backdrop-blur-sm z-50">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between gap-3">
-            {currentStep > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep(prev => prev - 1)}
-                className="animate-pulse"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            )}
-            <div className="flex-1" />
-            {currentStep < 2 && (
-              <Button
-                onClick={() => setCurrentStep(prev => prev + 1)}
-                disabled={!canGoNext()}
-                className={canGoNext() ? "animate-pulse" : ""}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            )}
-          </div>
-        </div> */}
       </div>
     </>
   );

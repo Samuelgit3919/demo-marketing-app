@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Line, Rect, PencilBrush, Text as FabricText, Shadow, Circle, Path, Group } from "fabric";
+import {
+  Canvas as FabricCanvas,
+  Line,
+  Rect,
+  PencilBrush,
+  Text as FabricText,
+  Shadow,
+  Circle,
+  Path,
+  Group,
+} from "fabric";
 import * as fabric from "fabric";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,7 +22,7 @@ interface DrawingCanvasProps {
     dataUrl: string,
     wallMeasurements: WallMeasurement[],
     totalPerimeter: number,
-    totalArea: number
+    totalArea: number,
   ) => void;
   spaceId: string;
   unit: "cm" | "in";
@@ -36,119 +46,19 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
   const previousUnitRef = useRef<"cm" | "in">(unit);
   const MAX_WALLS = 6;
 
-  // Helper functions to update label positions
-  const updateShapeLabels = (shape: any, labels: FabricText[]) => {
-    if (!fabricCanvas) return;
-    const bounds = shape.getBoundingRect();
-    const width = bounds.width;
-    const height = bounds.height;
-
-    // For rectangles: top, right, bottom, left
-    if (labels.length === 4) {
-      labels[0].set({ left: bounds.left + width / 2, top: bounds.top - 15 }); // top
-      labels[1].set({ left: bounds.left + width + 10, top: bounds.top + height / 2 }); // right
-      labels[2].set({ left: bounds.left + width / 2, top: bounds.top + height + 10 }); // bottom
-      labels[3].set({ left: bounds.left - 20, top: bounds.top + height / 2 }); // left
-    }
-    fabricCanvas.renderAll();
-  };
-
-  const updateLShapeLabels = (shape: any, labels: FabricText[], shapeType: string) => {
-    if (!fabricCanvas) return;
-    const bounds = shape.getBoundingRect();
-    const width = bounds.width;
-    const height = bounds.height;
-
-    // Different positioning for each L-shape variant
-    switch (shapeType) {
-      case 'lshape-1': // ┌
-        labels[0]?.set({ left: bounds.left + width / 2, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height * 0.3 });
-        labels[2]?.set({ left: bounds.left + width * 0.8, top: bounds.top + height * 0.6 });
-        labels[3]?.set({ left: bounds.left + width * 0.5, top: bounds.top + height + 5 });
-        labels[4]?.set({ left: bounds.left + width * 0.25, top: bounds.top + height * 0.6 });
-        labels[5]?.set({ left: bounds.left - 10, top: bounds.top + height / 2 });
-        break;
-      case 'lshape-2': // ┐
-        labels[0]?.set({ left: bounds.left + width * 0.25, top: bounds.top + height * 0.6 });
-        labels[1]?.set({ left: bounds.left + width * 0.4, top: bounds.top + height * 0.3 });
-        labels[2]?.set({ left: bounds.left + width * 0.4, top: bounds.top - 10 });
-        labels[3]?.set({ left: bounds.left + width + 5, top: bounds.top + height / 2 });
-        labels[4]?.set({ left: bounds.left + width / 2, top: bounds.top + height + 5 });
-        labels[5]?.set({ left: bounds.left - 10, top: bounds.top + height * 0.8 });
-        break;
-      case 'lshape-3': // └
-        labels[0]?.set({ left: bounds.left - 10, top: bounds.top + height / 2 });
-        labels[1]?.set({ left: bounds.left + width * 0.25, top: bounds.top + height * 0.4 });
-        labels[2]?.set({ left: bounds.left + width * 0.5, top: bounds.top - 10 });
-        labels[3]?.set({ left: bounds.left + width * 0.8, top: bounds.top + height * 0.4 });
-        labels[4]?.set({ left: bounds.left + width + 5, top: bounds.top + height * 0.7 });
-        labels[5]?.set({ left: bounds.left + width / 2, top: bounds.top + height + 5 });
-        break;
-      case 'lshape-4': // ┘
-        labels[0]?.set({ left: bounds.left + width / 2, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height * 0.2 });
-        labels[2]?.set({ left: bounds.left + width * 0.75, top: bounds.top + height * 0.4 });
-        labels[3]?.set({ left: bounds.left + width * 0.6, top: bounds.top + height * 0.6 });
-        labels[4]?.set({ left: bounds.left + width * 0.6, top: bounds.top + height + 5 });
-        labels[5]?.set({ left: bounds.left - 10, top: bounds.top + height / 2 });
-        break;
-    }
-    fabricCanvas.renderAll();
-  };
-
-  const updateAngleLabels = (shape: any, labels: FabricText[], shapeType: string) => {
-    if (!fabricCanvas) return;
-    const bounds = shape.getBoundingRect();
-    const width = bounds.width;
-    const height = bounds.height;
-
-    // Different positioning for each angle variant (5-wall chamfered shapes)
-    switch (shapeType) {
-      case 'angle-1': // top-right chamfer
-        labels[0]?.set({ left: bounds.left + width * 0.4, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width * 0.85, top: bounds.top + height * 0.15 });
-        labels[2]?.set({ left: bounds.left + width + 5, top: bounds.top + height * 0.6 });
-        labels[3]?.set({ left: bounds.left + width / 2, top: bounds.top + height + 5 });
-        labels[4]?.set({ left: bounds.left - 10, top: bounds.top + height / 2 });
-        break;
-      case 'angle-2': // top-left chamfer
-        labels[0]?.set({ left: bounds.left + width * 0.6, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height / 2 });
-        labels[2]?.set({ left: bounds.left + width / 2, top: bounds.top + height + 5 });
-        labels[3]?.set({ left: bounds.left - 10, top: bounds.top + height * 0.6 });
-        labels[4]?.set({ left: bounds.left + width * 0.15, top: bounds.top + height * 0.15 });
-        break;
-      case 'angle-3': // bottom-left chamfer
-        labels[0]?.set({ left: bounds.left + width / 2, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height / 2 });
-        labels[2]?.set({ left: bounds.left + width * 0.6, top: bounds.top + height + 5 });
-        labels[3]?.set({ left: bounds.left + width * 0.15, top: bounds.top + height * 0.85 });
-        labels[4]?.set({ left: bounds.left - 10, top: bounds.top + height * 0.4 });
-        break;
-      case 'angle-4': // bottom-right chamfer
-        labels[0]?.set({ left: bounds.left + width / 2, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height * 0.4 });
-        labels[2]?.set({ left: bounds.left + width * 0.85, top: bounds.top + height * 0.85 });
-        labels[3]?.set({ left: bounds.left + width * 0.4, top: bounds.top + height + 5 });
-        labels[4]?.set({ left: bounds.left - 10, top: bounds.top + height / 2 });
-        break;
-      case 'angle-5': // right-side chamfer
-        labels[0]?.set({ left: bounds.left + width / 2, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height * 0.25 });
-        labels[2]?.set({ left: bounds.left + width * 0.85, top: bounds.top + height * 0.5 });
-        labels[3]?.set({ left: bounds.left + width / 2, top: bounds.top + height + 5 });
-        labels[4]?.set({ left: bounds.left - 10, top: bounds.top + height / 2 });
-        break;
-      case 'angle-6': // left-side chamfer
-        labels[0]?.set({ left: bounds.left + width / 2, top: bounds.top - 10 });
-        labels[1]?.set({ left: bounds.left + width + 5, top: bounds.top + height / 2 });
-        labels[2]?.set({ left: bounds.left + width / 2, top: bounds.top + height + 5 });
-        labels[3]?.set({ left: bounds.left - 10, top: bounds.top + height * 0.75 });
-        labels[4]?.set({ left: bounds.left + width * 0.15, top: bounds.top + height * 0.5 });
-        break;
-    }
-    fabricCanvas.renderAll();
+  // Helper function to create a label at a relative position from shape center
+  const createLabel = (text: string, offsetX: number, offsetY: number) => {
+    return new FabricText(text, {
+      originX: "center",
+      originY: "center",
+      left: offsetX,
+      top: offsetY,
+      fill: "#ef4444",
+      fontSize: 20,
+      fontWeight: "bold",
+      selectable: false,
+      evented: false,
+    });
   };
 
   useEffect(() => {
@@ -198,7 +108,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
     pencilBrush.color = "#1a1a1a";
     pencilBrush.width = 3;
     pencilBrush.shadow = new Shadow({
-      color: 'rgba(0, 0, 0, 0.3)',
+      color: "rgba(0, 0, 0, 0.3)",
       blur: 8,
       offsetX: 2,
       offsetY: 2,
@@ -208,7 +118,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
     canvas.freeDrawingBrush = pencilBrush;
 
     // Enable touch scrolling prevention
-    canvasRef.current.style.touchAction = 'none';
+    canvasRef.current.style.touchAction = "none";
 
     setFabricCanvas(canvas);
     setHistory([]);
@@ -229,10 +139,10 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
       canvas.renderAll();
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       canvas.dispose();
     };
   }, [spaceId]);
@@ -243,14 +153,16 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
     const conversionFactor = unit === "cm" ? 2.54 : 1 / 2.54;
 
-    setWallMeasurements(prev => prev.map(wall => {
-      const currentValue = parseFloat(wall.length) || 0;
-      const convertedValue = currentValue * conversionFactor;
-      return {
-        ...wall,
-        length: convertedValue > 0 ? convertedValue.toFixed(2) : ''
-      };
-    }));
+    setWallMeasurements((prev) =>
+      prev.map((wall) => {
+        const currentValue = parseFloat(wall.length) || 0;
+        const convertedValue = currentValue * conversionFactor;
+        return {
+          ...wall,
+          length: convertedValue > 0 ? convertedValue.toFixed(2) : "",
+        };
+      }),
+    );
 
     previousUnitRef.current = unit;
   }, [unit]);
@@ -268,9 +180,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
       // Remove grid lines before saving to history
       const allObjects = fabricCanvas.getObjects();
-      const drawingObjects = allObjects.filter(obj =>
-        !gridLinesRef.current.includes(obj) &&
-        !(obj instanceof FabricText)
+      const drawingObjects = allObjects.filter(
+        (obj) => !gridLinesRef.current.includes(obj) && !(obj instanceof FabricText),
       );
 
       // Auto-straighten lines for draw tool
@@ -306,7 +217,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               stroke: "#1a1a1a",
               strokeWidth: 3,
               shadow: new Shadow({
-                color: 'rgba(0, 0, 0, 0.3)',
+                color: "rgba(0, 0, 0, 0.3)",
                 blur: 8,
                 offsetX: 2,
                 offsetY: 2,
@@ -316,8 +227,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               hasBorders: true,
               cornerSize: 10,
               transparentCorners: false,
-              cornerColor: '#3b82f6',
-              cornerStyle: 'circle',
+              cornerColor: "#3b82f6",
+              cornerStyle: "circle",
               lockRotation: false,
             });
 
@@ -331,8 +242,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               left: bounds.left + bounds.width / 2,
               top: bounds.top + bounds.height / 2 - 10,
               fontSize: 20,
-              fill: '#ef4444',
-              fontWeight: 'bold',
+              fill: "#ef4444",
+              fontWeight: "bold",
               selectable: false,
               evented: false,
             });
@@ -341,7 +252,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             wallLabelsRef.current.push({ shape: straightLine, label: text });
 
             // Add object:moving event listener to move label with shape
-            straightLine.on('moving', function () {
+            straightLine.on("moving", function () {
               const bounds = straightLine.getBoundingRect();
               text.set({
                 left: bounds.left + bounds.width / 2,
@@ -350,7 +261,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               fabricCanvas.renderAll();
             });
 
-            straightLine.on('scaling', function () {
+            straightLine.on("scaling", function () {
               const bounds = straightLine.getBoundingRect();
               text.set({
                 left: bounds.left + bounds.width / 2,
@@ -359,7 +270,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               fabricCanvas.renderAll();
             });
 
-            straightLine.on('rotating', function () {
+            straightLine.on("rotating", function () {
               const bounds = straightLine.getBoundingRect();
               text.set({
                 left: bounds.left + bounds.width / 2,
@@ -369,22 +280,21 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             });
 
             // Add to measurements list
-            setWallMeasurements(prev => [...prev, { label, length: '' }]);
+            setWallMeasurements((prev) => [...prev, { label, length: "" }]);
 
             fabricCanvas.renderAll();
 
-            const updatedObjects = fabricCanvas.getObjects().filter(obj =>
-              !gridLinesRef.current.includes(obj) &&
-              !(obj instanceof FabricText)
-            );
+            const updatedObjects = fabricCanvas
+              .getObjects()
+              .filter((obj) => !gridLinesRef.current.includes(obj) && !(obj instanceof FabricText));
             setWallCount(updatedObjects.length);
 
             // Save current state to history
             const canvasState = fabricCanvas.toJSON();
-            canvasState.objects = canvasState.objects.filter((obj: any) =>
-              !gridLinesRef.current.some(gridLine => gridLine.toJSON().type === obj.type)
+            canvasState.objects = canvasState.objects.filter(
+              (obj: any) => !gridLinesRef.current.some((gridLine) => gridLine.toJSON().type === obj.type),
             );
-            setHistory(prev => [...prev, JSON.stringify(canvasState)]);
+            setHistory((prev) => [...prev, JSON.stringify(canvasState)]);
 
             const dataUrl = fabricCanvas.toDataURL();
             const currentPerimeter = wallMeasurements.reduce((sum, wall) => sum + (parseFloat(wall.length) || 0), 0);
@@ -402,8 +312,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
           hasBorders: true,
           cornerSize: 10,
           transparentCorners: false,
-          cornerColor: '#3b82f6',
-          cornerStyle: 'circle',
+          cornerColor: "#3b82f6",
+          cornerStyle: "circle",
           lockRotation: false,
         });
       }
@@ -417,8 +327,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         left: bounds.left + bounds.width / 2,
         top: bounds.top + bounds.height / 2,
         fontSize: 20,
-        fill: '#ef4444',
-        fontWeight: 'bold',
+        fill: "#ef4444",
+        fontWeight: "bold",
         selectable: false,
         evented: false,
       });
@@ -427,7 +337,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
       wallLabelsRef.current.push({ shape: path, label: text });
 
       // Add object:moving event listener to move label with shape
-      path.on('moving', function () {
+      path.on("moving", function () {
         const bounds = path.getBoundingRect();
         text.set({
           left: bounds.left + bounds.width / 2,
@@ -436,7 +346,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         fabricCanvas.renderAll();
       });
 
-      path.on('scaling', function () {
+      path.on("scaling", function () {
         const bounds = path.getBoundingRect();
         text.set({
           left: bounds.left + bounds.width / 2,
@@ -445,7 +355,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         fabricCanvas.renderAll();
       });
 
-      path.on('rotating', function () {
+      path.on("rotating", function () {
         const bounds = path.getBoundingRect();
         text.set({
           left: bounds.left + bounds.width / 2,
@@ -455,23 +365,24 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
       });
 
       // Add to measurements list
-      setWallMeasurements(prev => [...prev, { label, length: '' }]);
+      setWallMeasurements((prev) => [...prev, { label, length: "" }]);
 
-      const updatedObjects = fabricCanvas.getObjects().filter(obj =>
-        !gridLinesRef.current.includes(obj) &&
-        !(obj instanceof FabricText)
-      );
+      const updatedObjects = fabricCanvas
+        .getObjects()
+        .filter((obj) => !gridLinesRef.current.includes(obj) && !(obj instanceof FabricText));
       setWallCount(updatedObjects.length);
 
       // Save current state to history (without grid lines)
       const canvasState = fabricCanvas.toJSON();
       // Remove grid lines from the saved state
-      canvasState.objects = canvasState.objects.filter((obj: any) =>
-        !gridLinesRef.current.some(gridLine => gridLine.toJSON().type === obj.type &&
-          gridLine.toJSON().stroke === obj.stroke)
+      canvasState.objects = canvasState.objects.filter(
+        (obj: any) =>
+          !gridLinesRef.current.some(
+            (gridLine) => gridLine.toJSON().type === obj.type && gridLine.toJSON().stroke === obj.stroke,
+          ),
       );
 
-      setHistory(prev => [...prev, JSON.stringify(canvasState)]);
+      setHistory((prev) => [...prev, JSON.stringify(canvasState)]);
 
       const dataUrl = fabricCanvas.toDataURL();
       const currentPerimeter = wallMeasurements.reduce((sum, wall) => sum + (parseFloat(wall.length) || 0), 0);
@@ -498,419 +409,281 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
     const centerX = fabricCanvas.width! / 2;
     const centerY = fabricCanvas.height! / 2;
     const wallShadow = new Shadow({
-      color: 'rgba(0, 0, 0, 0.3)',
+      color: "rgba(0, 0, 0, 0.3)",
       blur: 8,
       offsetX: 2,
       offsetY: 2,
     });
 
-    let shape: any;
-    let labels: FabricText[] = [];
+    let shapeObj: any;
+    let labelObjects: FabricText[] = [];
     let wallLengths: string[] = [];
     const currentLabelIndex = wallLabelsRef.current.length;
 
+    // Helper to create a label text object with relative positioning
+    const makeLabel = (char: string, x: number, y: number) => {
+      return new FabricText(char, {
+        left: x,
+        top: y,
+        originX: "center",
+        originY: "center",
+        fill: "#ef4444",
+        fontSize: 20,
+        fontWeight: "bold",
+        selectable: false,
+        evented: false,
+      });
+    };
+
     switch (shapeType) {
       case "rectangle":
-        shape = new Rect({
-          left: centerX - 75,
-          top: centerY - 50,
+        shapeObj = new Rect({
+          left: -75,
+          top: -50,
           width: 150,
           height: 100,
           stroke: "#1a1a1a",
           strokeWidth: 3,
-          fill: '',
+          fill: "transparent",
           shadow: wallShadow,
-          selectable: true,
-          hasControls: true,
-          hasBorders: true,
-          cornerSize: 10,
-          transparentCorners: false,
-          cornerColor: '#3b82f6',
-          cornerStyle: 'circle',
-          lockRotation: false,
         });
-        wallLengths = ['150', '100', '150', '100'];
-        const topLabel = new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-          left: centerX, top: centerY - 65, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-        });
-        const rightLabel = new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-          left: centerX + 85, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-        });
-        const bottomLabel = new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-          left: centerX, top: centerY + 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-        });
-        const leftLabel = new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-          left: centerX - 95, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-        });
-        labels.push(topLabel, rightLabel, bottomLabel, leftLabel);
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateShapeLabels(shape, [topLabel, rightLabel, bottomLabel, leftLabel]));
-        shape.on('scaling', () => updateShapeLabels(shape, [topLabel, rightLabel, bottomLabel, leftLabel]));
-        shape.on('rotating', () => updateShapeLabels(shape, [topLabel, rightLabel, bottomLabel, leftLabel]));
-        shape.on('modified', () => updateShapeLabels(shape, [topLabel, rightLabel, bottomLabel, leftLabel]));
+        wallLengths = ["150", "100", "150", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), 0, -58),     // top
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 83, 0),  // right
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 0, 68),  // bottom
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), -93, 0), // left
+        ];
         break;
 
       case "lshape-1":
-        // L-shape bottom-right: ┌
         const lPath1 = "M 0,0 L 100,0 L 100,60 L 60,60 L 60,100 L 0,100 Z";
-        shape = new Path(lPath1, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(lPath1, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['100', '60', '40', '40', '60', '100'];
-        // Labels positioned near each wall: top, right-top, right-bottom, bottom-right, bottom-left, left
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX + 55, top: centerY - 20, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 35, top: centerY + 30, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 5, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX - 25, top: centerY + 30, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 5), {
-            left: centerX - 60, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateLShapeLabels(shape, labels, 'lshape-1'));
-        shape.on('scaling', () => updateLShapeLabels(shape, labels, 'lshape-1'));
-        shape.on('rotating', () => updateLShapeLabels(shape, labels, 'lshape-1'));
-        shape.on('modified', () => updateLShapeLabels(shape, labels, 'lshape-1'));
+        wallLengths = ["100", "60", "40", "40", "60", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), 0, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 55, -20),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 35, 30),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 5, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), -25, 30),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 5), -60, 0),
+        ];
         break;
 
       case "lshape-2":
-        // L-shape bottom-left: ┐
         const lPath2 = "M 0,60 L 40,60 L 40,0 L 100,0 L 100,100 L 0,100 Z";
-        shape = new Path(lPath2, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(lPath2, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['40', '60', '100', '100', '40', '60'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 30, top: centerY + 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX - 10, top: centerY - 20, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 20, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 55, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 5), {
-            left: centerX - 30, top: centerY + 30, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateLShapeLabels(shape, labels, 'lshape-2'));
-        shape.on('scaling', () => updateLShapeLabels(shape, labels, 'lshape-2'));
-        shape.on('rotating', () => updateLShapeLabels(shape, labels, 'lshape-2'));
-        shape.on('modified', () => updateLShapeLabels(shape, labels, 'lshape-2'));
+        wallLengths = ["40", "60", "100", "100", "40", "60"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -30, 5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -10, -20),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 20, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 55, 0),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 0, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 5), -30, 30),
+        ];
         break;
 
       case "lshape-3":
-        // L-shape top-right: └
         const lPath3 = "M 0,0 L 60,0 L 60,40 L 100,40 L 100,100 L 0,100 Z";
-        shape = new Path(lPath3, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(lPath3, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['60', '40', '40', '60', '100', '100'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 20, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX + 10, top: centerY - 30, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 35, top: centerY - 10, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 55, top: centerY + 20, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 5), {
-            left: centerX - 60, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateLShapeLabels(shape, labels, 'lshape-3'));
-        shape.on('scaling', () => updateLShapeLabels(shape, labels, 'lshape-3'));
-        shape.on('rotating', () => updateLShapeLabels(shape, labels, 'lshape-3'));
-        shape.on('modified', () => updateLShapeLabels(shape, labels, 'lshape-3'));
+        wallLengths = ["60", "40", "40", "60", "100", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -20, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 10, -30),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 35, -10),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 55, 20),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 0, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 5), -60, 0),
+        ];
         break;
 
       case "lshape-4":
-        // L-shape top-left: ┘
         const lPath4 = "M 0,40 L 40,40 L 40,0 L 100,0 L 100,100 L 0,100 Z";
-        shape = new Path(lPath4, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(lPath4, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['40', '40', '60', '100', '100', '60'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 30, top: centerY - 10, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX - 10, top: centerY - 30, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 20, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 55, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 5), {
-            left: centerX - 30, top: centerY + 20, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateLShapeLabels(shape, labels, 'lshape-4'));
-        shape.on('scaling', () => updateLShapeLabels(shape, labels, 'lshape-4'));
-        shape.on('rotating', () => updateLShapeLabels(shape, labels, 'lshape-4'));
-        shape.on('modified', () => updateLShapeLabels(shape, labels, 'lshape-4'));
+        wallLengths = ["40", "40", "60", "100", "100", "60"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -30, -10),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -10, -30),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 20, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 55, 0),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 0, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 5), -30, 20),
+        ];
         break;
 
       case "angle-1":
-        // Rectangle with top-left corner chamfered (5 walls)
         const anglePath1 = "M 0,100 L 0,20 L 20,0 L 100,0 L 100,100 Z";
-        shape = new Path(anglePath1, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(anglePath1, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['80', '28', '80', '100', '100'];
-        // Labels: left wall, diagonal, top wall, right wall, bottom wall
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 60, top: centerY + 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX - 30, top: centerY - 40, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 10, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 55, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateAngleLabels(shape, labels, 'angle-1'));
-        shape.on('scaling', () => updateAngleLabels(shape, labels, 'angle-1'));
-        shape.on('rotating', () => updateAngleLabels(shape, labels, 'angle-1'));
-        shape.on('modified', () => updateAngleLabels(shape, labels, 'angle-1'));
+        wallLengths = ["80", "28", "80", "100", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -60, 5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -30, -40),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 10, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 55, 0),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 0, 55),
+        ];
         break;
 
       case "angle-2":
-        // Rectangle with bottom-left corner chamfered (5 walls)
         const anglePath2 = "M 0,0 L 0,80 L 20,100 L 100,100 L 100,0 Z";
-        shape = new Path(anglePath2, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(anglePath2, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['80', '28', '80', '100', '100'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 60, top: centerY - 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX - 30, top: centerY + 40, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 10, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 55, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateAngleLabels(shape, labels, 'angle-2'));
-        shape.on('scaling', () => updateAngleLabels(shape, labels, 'angle-2'));
-        shape.on('rotating', () => updateAngleLabels(shape, labels, 'angle-2'));
-        shape.on('modified', () => updateAngleLabels(shape, labels, 'angle-2'));
+        wallLengths = ["80", "28", "80", "100", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -60, -5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -30, 40),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 10, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 55, 0),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 0, -60),
+        ];
         break;
 
       case "angle-3":
-        // Rectangle with top-right corner chamfered (5 walls)
         const anglePath3 = "M 0,0 L 80,0 L 100,20 L 100,100 L 0,100 Z";
-        shape = new Path(anglePath3, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(anglePath3, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['80', '28', '80', '100', '100'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 10, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX + 30, top: centerY - 40, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 55, top: centerY + 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX - 60, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateAngleLabels(shape, labels, 'angle-3'));
-        shape.on('scaling', () => updateAngleLabels(shape, labels, 'angle-3'));
-        shape.on('rotating', () => updateAngleLabels(shape, labels, 'angle-3'));
-        shape.on('modified', () => updateAngleLabels(shape, labels, 'angle-3'));
+        wallLengths = ["80", "28", "80", "100", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -10, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 30, -40),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 55, 5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 0, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), -60, 0),
+        ];
         break;
 
       case "angle-4":
-        // Rectangle with bottom-right corner chamfered (5 walls)
         const anglePath4 = "M 0,0 L 100,0 L 100,80 L 80,100 L 0,100 Z";
-        shape = new Path(anglePath4, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(anglePath4, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['100', '80', '28', '80', '100'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX + 55, top: centerY - 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 30, top: centerY + 40, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX - 10, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX - 60, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateAngleLabels(shape, labels, 'angle-4'));
-        shape.on('scaling', () => updateAngleLabels(shape, labels, 'angle-4'));
-        shape.on('rotating', () => updateAngleLabels(shape, labels, 'angle-4'));
-        shape.on('modified', () => updateAngleLabels(shape, labels, 'angle-4'));
+        wallLengths = ["100", "80", "28", "80", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), 0, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 55, -5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 30, 40),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), -10, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), -60, 0),
+        ];
         break;
 
       case "angle-5":
-        // Rectangle with top-right corner chamfered variation (5 walls)
         const anglePath5 = "M 0,0 L 80,0 L 100,20 L 100,100 L 0,100 Z";
-        shape = new Path(anglePath5, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(anglePath5, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['80', '28', '80', '100', '100'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 10, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX + 30, top: centerY - 40, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 55, top: centerY + 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX - 60, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateAngleLabels(shape, labels, 'angle-5'));
-        shape.on('scaling', () => updateAngleLabels(shape, labels, 'angle-5'));
-        shape.on('rotating', () => updateAngleLabels(shape, labels, 'angle-5'));
-        shape.on('modified', () => updateAngleLabels(shape, labels, 'angle-5'));
+        wallLengths = ["80", "28", "80", "100", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -10, -60),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 30, -40),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 55, 5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 0, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), -60, 0),
+        ];
         break;
 
       case "angle-6":
-        // Rectangle with bottom-left corner chamfered variation (5 walls)
         const anglePath6 = "M 0,0 L 0,80 L 20,100 L 100,100 L 100,0 Z";
-        shape = new Path(anglePath6, {
-          left: centerX - 50, top: centerY - 50, stroke: "#1a1a1a", strokeWidth: 3, fill: '', shadow: wallShadow,
-          selectable: true, hasControls: true, hasBorders: true, cornerSize: 10, transparentCorners: false,
-          cornerColor: '#3b82f6', cornerStyle: 'circle', lockRotation: false,
+        shapeObj = new Path(anglePath6, {
+          left: -50,
+          top: -50,
+          stroke: "#1a1a1a",
+          strokeWidth: 3,
+          fill: "transparent",
+          shadow: wallShadow,
         });
-        wallLengths = ['80', '28', '80', '100', '100'];
-        labels.push(
-          new FabricText(String.fromCharCode(65 + currentLabelIndex), {
-            left: centerX - 60, top: centerY - 5, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 1), {
-            left: centerX - 30, top: centerY + 40, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 2), {
-            left: centerX + 10, top: centerY + 55, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 3), {
-            left: centerX + 55, top: centerY, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          }),
-          new FabricText(String.fromCharCode(65 + currentLabelIndex + 4), {
-            left: centerX, top: centerY - 60, fill: '#ef4444', fontSize: 20, fontWeight: 'bold', selectable: false, evented: false,
-          })
-        );
-
-        // Add event listeners to update label positions
-        shape.on('moving', () => updateAngleLabels(shape, labels, 'angle-6'));
-        shape.on('scaling', () => updateAngleLabels(shape, labels, 'angle-6'));
-        shape.on('rotating', () => updateAngleLabels(shape, labels, 'angle-6'));
-        shape.on('modified', () => updateAngleLabels(shape, labels, 'angle-6'));
+        wallLengths = ["80", "28", "80", "100", "100"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -60, -5),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -30, 40),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 10, 55),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 55, 0),
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 0, -60),
+        ];
         break;
     }
 
-    if (shape) {
-      fabricCanvas.add(shape);
-      labels.forEach(label => {
-        fabricCanvas.add(label);
-        wallLabelsRef.current.push({ shape, label });
+    if (shapeObj && labelObjects.length > 0) {
+      // Create a Group containing the shape and all labels - they move together
+      const shapeGroup = new Group([shapeObj, ...labelObjects], {
+        left: centerX,
+        top: centerY,
+        originX: "center",
+        originY: "center",
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        cornerSize: 10,
+        transparentCorners: false,
+        cornerColor: "#3b82f6",
+        cornerStyle: "circle",
+        lockRotation: false,
+        subTargetCheck: false,
+      });
+
+      fabricCanvas.add(shapeGroup);
+
+      // Store references for later
+      labelObjects.forEach((label) => {
+        wallLabelsRef.current.push({ shape: shapeGroup, label });
       });
 
       // Add measurements to state
@@ -918,25 +691,24 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         label: String.fromCharCode(65 + currentLabelIndex + index),
         length: length,
       }));
-      setWallMeasurements(prev => [...prev, ...newMeasurements]);
+      setWallMeasurements((prev) => [...prev, ...newMeasurements]);
 
-      fabricCanvas.setActiveObject(shape);
-      fabricCanvas.isDrawingMode = false; // Exit drawing mode to allow immediate manipulation
+      fabricCanvas.setActiveObject(shapeGroup);
+      fabricCanvas.isDrawingMode = false;
       fabricCanvas.renderAll();
 
       // Update wall count
-      const drawingObjects = fabricCanvas.getObjects().filter(obj =>
-        !gridLinesRef.current.includes(obj) &&
-        !(obj instanceof FabricText)
-      );
-      setWallCount(drawingObjects.length);
+      const drawingObjects = fabricCanvas
+        .getObjects()
+        .filter((obj) => !gridLinesRef.current.includes(obj) && !(obj instanceof FabricText) && !(obj instanceof Group && obj === shapeGroup));
+      setWallCount(drawingObjects.length + 1);
 
       // Save to history
       const canvasState = fabricCanvas.toJSON();
-      canvasState.objects = canvasState.objects.filter((obj: any) =>
-        !gridLinesRef.current.some(gridLine => gridLine.toJSON().type === obj.type)
+      canvasState.objects = canvasState.objects.filter(
+        (obj: any) => !gridLinesRef.current.some((gridLine) => gridLine.toJSON().type === obj.type),
       );
-      setHistory(prev => [...prev, JSON.stringify(canvasState)]);
+      setHistory((prev) => [...prev, JSON.stringify(canvasState)]);
 
       const dataUrl = fabricCanvas.toDataURL();
       const currentPerimeter = wallMeasurements.reduce((sum, wall) => sum + (parseFloat(wall.length) || 0), 0);
@@ -950,9 +722,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
     if (!fabricCanvas) return;
 
     const allObjects = fabricCanvas.getObjects();
-    const drawingObjects = allObjects.filter(obj =>
-      !gridLinesRef.current.includes(obj) &&
-      !(obj instanceof FabricText)
+    const drawingObjects = allObjects.filter(
+      (obj) => !gridLinesRef.current.includes(obj) && !(obj instanceof FabricText),
     );
 
     if (drawingObjects.length === 0) {
@@ -962,36 +733,47 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
     isRestoringRef.current = true;
 
-    // Remove the last drawing object
+    // Remove the last drawing object (could be a Group or individual shape)
     const lastObject = drawingObjects[drawingObjects.length - 1];
+
+    // Count how many labels are associated with this object
+    let labelsToRemove = 0;
+    if (lastObject instanceof Group) {
+      // For groups, count labels that belong to this group
+      labelsToRemove = wallLabelsRef.current.filter(item => item.shape === lastObject).length;
+      // Remove all wallLabelsRef entries for this group
+      wallLabelsRef.current = wallLabelsRef.current.filter(item => item.shape !== lastObject);
+    } else {
+      // For individual shapes, find and remove the associated label
+      const labelEntry = wallLabelsRef.current.find(item => item.shape === lastObject);
+      if (labelEntry) {
+        fabricCanvas.remove(labelEntry.label);
+        wallLabelsRef.current = wallLabelsRef.current.filter(item => item.shape !== lastObject);
+        labelsToRemove = 1;
+      }
+    }
+
     fabricCanvas.remove(lastObject);
 
-    // Remove the last label if it exists
-    if (wallLabelsRef.current.length > 0) {
-      const lastLabelData = wallLabelsRef.current[wallLabelsRef.current.length - 1];
-      const lastLabel = lastLabelData.label || lastLabelData;
-      fabricCanvas.remove(lastLabel);
-      wallLabelsRef.current.pop();
-
-      // Remove last measurement
-      setWallMeasurements(prev => prev.slice(0, -1));
+    // Remove the corresponding measurements
+    if (labelsToRemove > 0) {
+      setWallMeasurements((prev) => prev.slice(0, -labelsToRemove));
     }
 
     fabricCanvas.renderAll();
 
     // Update counts
-    const updatedDrawingObjects = fabricCanvas.getObjects().filter(obj =>
-      !gridLinesRef.current.includes(obj) &&
-      !(obj instanceof FabricText)
-    );
+    const updatedDrawingObjects = fabricCanvas
+      .getObjects()
+      .filter((obj) => !gridLinesRef.current.includes(obj) && !(obj instanceof FabricText));
     setWallCount(updatedDrawingObjects.length);
 
     // Save current state to history
     const canvasState = fabricCanvas.toJSON();
-    canvasState.objects = canvasState.objects.filter((obj: any) =>
-      !gridLinesRef.current.some(gridLine => gridLine.toJSON().type === obj.type)
+    canvasState.objects = canvasState.objects.filter(
+      (obj: any) => !gridLinesRef.current.some((gridLine) => gridLine.toJSON().type === obj.type),
     );
-    setHistory(prev => [...prev, JSON.stringify(canvasState)]);
+    setHistory((prev) => [...prev, JSON.stringify(canvasState)]);
 
     const dataUrl = fabricCanvas.toDataURL();
     const currentPerimeter = wallMeasurements.reduce((sum, wall) => sum + (parseFloat(wall.length) || 0), 0);
@@ -1021,7 +803,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
   };
 
   const handleMeasurementChange = (index: number, value: string) => {
-    setWallMeasurements(prev => {
+    setWallMeasurements((prev) => {
       const newMeasurements = [...prev];
       newMeasurements[index] = { ...newMeasurements[index], length: value };
 
@@ -1041,9 +823,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
   const calculateAreaFromMeasurements = (measurements: WallMeasurement[]) => {
     if (measurements.length < 4) return 0;
 
-    const lengths = measurements
-      .map(w => parseFloat(w.length) || 0)
-      .filter(l => l > 0);
+    const lengths = measurements.map((w) => parseFloat(w.length) || 0).filter((l) => l > 0);
 
     if (lengths.length >= 2) {
       const sortedLengths = [...lengths].sort((a, b) => a - b);
@@ -1067,9 +847,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
     if (wallMeasurements.length < 4) return 0;
 
     // Try to find pairs of opposite walls for width and height
-    const lengths = wallMeasurements
-      .map(w => parseFloat(w.length) || 0)
-      .filter(l => l > 0);
+    const lengths = wallMeasurements.map((w) => parseFloat(w.length) || 0).filter((l) => l > 0);
 
     if (lengths.length >= 2) {
       // Simple approximation: use average of pairs
@@ -1086,28 +864,19 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
   return (
     <div className="space-y-3 md:space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
-        <div>
-          <h3 className="font-semibold text-base md:text-lg">Draw your space layout</h3>
-          <p className="text-xs md:text-sm text-muted-foreground">Draw walls BIRDS EYE VIEW or use ROOM TEMPLATES below</p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button onClick={handleUndo} variant="outline" size="sm" className="animate-pulse">
-            <Undo className="w-4 h-4 md:mr-2" />
-            <span className="hidden sm:inline">Undo</span>
-          </Button>
-          <Button onClick={handleReset} variant="outline" size="sm" className="animate-pulse">
-            Clear
-          </Button>
-        </div>
+      <div>
+        <h3 className="font-semibold text-base md:text-lg">Draw your space layout</h3>
+        <p className="text-xs md:text-sm text-muted-foreground">
+          Draw walls BIRDS EYE VIEW or use ROOM TEMPLATES below
+        </p>
       </div>
 
       {/* Shape Templates */}
       <div className="space-y-3">
-        <Label className="text-xs md:text-sm font-medium">Rectangle</Label>
+        <Label className="text-xs md:text-sm font-medium">L-Shape</Label>
         <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
           <button
-            onClick={() => addShapeTemplate('rectangle')}
+            onClick={() => addShapeTemplate("rectangle")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer"
             title="Rectangle"
           >
@@ -1115,12 +884,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               <rect x="2" y="2" width="46" height="36" />
             </svg>
           </button>
-        </div>
-
-        <Label className="text-xs md:text-sm font-medium">L-Shape</Label>
-        <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
           <button
-            onClick={() => addShapeTemplate('lshape-1')}
+            onClick={() => addShapeTemplate("lshape-1")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="L-Shape 1"
           >
@@ -1129,7 +894,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('lshape-2')}
+            onClick={() => addShapeTemplate("lshape-2")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="L-Shape 2"
           >
@@ -1138,7 +903,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('lshape-3')}
+            onClick={() => addShapeTemplate("lshape-3")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="L-Shape 3"
           >
@@ -1147,7 +912,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('lshape-4')}
+            onClick={() => addShapeTemplate("lshape-4")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="L-Shape 4"
           >
@@ -1160,7 +925,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         <Label className="text-xs md:text-sm font-medium">Angle</Label>
         <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
           <button
-            onClick={() => addShapeTemplate('angle-1')}
+            onClick={() => addShapeTemplate("angle-1")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="Rectangle with Top-Left Chamfer"
           >
@@ -1169,7 +934,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('angle-2')}
+            onClick={() => addShapeTemplate("angle-2")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="Rectangle with Bottom-Left Chamfer"
           >
@@ -1178,7 +943,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('angle-3')}
+            onClick={() => addShapeTemplate("angle-3")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="Rectangle with Top-Right Chamfer"
           >
@@ -1187,7 +952,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('angle-4')}
+            onClick={() => addShapeTemplate("angle-4")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="Rectangle with Bottom-Right Chamfer"
           >
@@ -1196,7 +961,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('angle-5')}
+            onClick={() => addShapeTemplate("angle-5")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="Rectangle with Top-Right Chamfer Alt"
           >
@@ -1205,7 +970,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
           <button
-            onClick={() => addShapeTemplate('angle-6')}
+            onClick={() => addShapeTemplate("angle-6")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
             title="Rectangle with Bottom-Left Chamfer Alt"
           >
@@ -1214,19 +979,31 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             </svg>
           </button>
         </div>
+
+        {/* Clear and Undo buttons moved here - below angle shapes */}
+        <div className="flex gap-2 flex-wrap mt-3 justify-end">
+          <Button onClick={handleUndo} variant="outline" size="sm" className="animate-pulse">
+            <Undo className="w-4 h-4 md:mr-2" />
+            <span className="hidden sm:inline">Undo</span>
+          </Button>
+          <Button onClick={handleReset} variant="outline" size="sm" className="animate-pulse">
+            Clear
+          </Button>
+        </div>
       </div>
 
-      <div className="border-2 border-border rounded-lg shadow-lg overflow-auto bg-white" style={{ touchAction: 'none' }}>
-        <canvas ref={canvasRef} className="touch-none" style={{ maxWidth: '100%', height: 'auto' }} />
+      <div
+        className="border-2 border-border rounded-lg shadow-lg overflow-auto bg-white"
+        style={{ touchAction: "none" }}
+      >
+        <canvas ref={canvasRef} className="touch-none" style={{ maxWidth: "100%", height: "auto" }} />
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs md:text-sm">
         <p className="text-muted-foreground">
           Walls drawn: {wallCount} / {MAX_WALLS}
         </p>
-        <p className="text-muted-foreground">
-          Drawing mode - Click and drag to draw walls
-        </p>
+        <p className="text-muted-foreground">Drawing mode - Click and drag to draw walls</p>
       </div>
 
       {/* Wall Measurements Input */}
@@ -1238,12 +1015,16 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 text-xs md:text-sm w-full sm:w-auto">
                 <div className="flex flex-col items-start sm:items-end">
                   <span className="text-muted-foreground">Total Perimeter</span>
-                  <span className="font-semibold text-primary">{totalPerimeter.toFixed(2)} {unit}</span>
+                  <span className="font-semibold text-primary">
+                    {totalPerimeter.toFixed(2)} {unit}
+                  </span>
                 </div>
                 {totalArea > 0 && (
                   <div className="flex flex-col items-start sm:items-end">
                     <span className="text-muted-foreground">Estimated Area</span>
-                    <span className="font-semibold text-primary">{totalArea.toFixed(2)} {unit}²</span>
+                    <span className="font-semibold text-primary">
+                      {totalArea.toFixed(2)} {unit}²
+                    </span>
                   </div>
                 )}
               </div>
@@ -1260,7 +1041,9 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
                   type="number"
                   placeholder={`Length (${unit})`}
                   value={wall.length}
-                  onChange={(e) => handleMeasurementChange(index, Math.max(0, parseFloat(e.target.value) || 0).toString())}
+                  onChange={(e) =>
+                    handleMeasurementChange(index, Math.max(0, parseFloat(e.target.value) || 0).toString())
+                  }
                   min="0"
                   step="0.1"
                   required

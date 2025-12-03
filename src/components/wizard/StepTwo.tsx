@@ -47,8 +47,26 @@ export const StepTwo = ({
   onNext,
   onBack,
 }: StepTwoProps) => {
-  const [unit, setUnit] = useState<"cm" | "in">("cm");
+  const [unit, setUnit] = useState<"cm" | "in">("in");
   const [activeSpaceId, setActiveSpaceId] = useState<string>("");
+
+  const handleUnitChange = (newUnit: "cm" | "in") => {
+    if (newUnit === unit) return;
+
+    const conversionFactor = newUnit === "cm" ? 2.54 : 1 / 2.54;
+
+    // Convert ceiling heights for all spaces
+    setSpaces(spaces.map((space) => {
+      const currentHeight = parseFloat(space.ceilingHeight) || 0;
+      const convertedHeight = currentHeight * conversionFactor;
+      return {
+        ...space,
+        ceilingHeight: convertedHeight > 0 ? Math.round(convertedHeight).toString() : (newUnit === "cm" ? "244" : "96")
+      };
+    }));
+
+    setUnit(newUnit);
+  };
 
   const addSpace = () => {
     const defaultCeiling = unit === "cm" ? "244" : "96";
@@ -201,7 +219,7 @@ export const StepTwo = ({
           <div className="flex items-center gap-3 md:gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Units</span>
-              <Select value={unit} onValueChange={(value: "cm" | "in") => setUnit(value)}>
+              <Select value={unit} onValueChange={(value: "cm" | "in") => handleUnitChange(value)}>
                 <SelectTrigger className="w-20">
                   <SelectValue />
                 </SelectTrigger>
@@ -427,24 +445,29 @@ export const StepTwo = ({
         </>
       )}
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between pt-4">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          size="lg"
-          className="animate-pulse"
-        >
-          Back
-        </Button>
-        <Button
-          onClick={handleNext}
-          size="lg"
-          className={`px-8 ${isFormValid() ? 'animate-pulse' : ''}`}
-          disabled={!isFormValid()}
-        >
-          Next
-        </Button>
+      {/* Spacer for floating buttons */}
+      <div className="h-20" />
+
+      {/* Floating Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 z-50">
+        <div className="max-w-5xl mx-auto flex justify-between">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            size="lg"
+            className="animate-pulse"
+          >
+            Back
+          </Button>
+          <Button
+            onClick={handleNext}
+            size="lg"
+            className={`px-8 ${isFormValid() ? 'animate-pulse' : ''}`}
+            disabled={!isFormValid()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

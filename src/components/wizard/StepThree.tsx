@@ -281,17 +281,33 @@ export const StepThree = ({
                       </div>
                     </div>
 
+                    {/* Space Drawing */}
+                    {space.drawingData && (
+                      <div className="pt-2 border-t">
+                        <p className="text-xs md:text-sm font-semibold text-foreground mb-2">
+                          Space Drawing
+                        </p>
+                        <div className="border rounded-lg overflow-hidden bg-white">
+                          <img
+                            src={space.drawingData}
+                            alt={`Drawing for ${space.name}`}
+                            className="w-full h-auto max-h-64 object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {/* Wall Measurements */}
                     {space.wallMeasurements && space.wallMeasurements.length > 0 && (
                       <div className="space-y-3 pt-2 border-t">
                         <p className="text-xs md:text-sm font-semibold text-foreground">
-                          Wall Measurements ({space.unit || 'cm'})
+                          Wall Measurements ({space.unit || 'in'})
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                           {space.wallMeasurements.map((wall: any, wallIndex: number) => (
                             <div key={wallIndex} className="flex items-center gap-1 text-xs md:text-sm">
                               <span className="font-semibold text-primary">Wall {wall.label}:</span>
-                              <span className="text-foreground">{wall.length || '—'} {space.unit || 'cm'}</span>
+                              <span className="text-foreground">{wall.length || '—'} {space.unit || 'in'}</span>
                             </div>
                           ))}
                         </div>
@@ -302,14 +318,14 @@ export const StepThree = ({
                             <div className="flex items-center gap-1 text-xs md:text-sm">
                               <span className="font-semibold text-muted-foreground">Total Perimeter:</span>
                               <span className="font-bold text-primary">
-                                {space.totalPerimeter.toFixed(2)} {space.unit || 'cm'}
+                                {space.totalPerimeter.toFixed(2)} {space.unit || 'in'}
                               </span>
                             </div>
                             {space.totalArea > 0 && (
                               <div className="flex items-center gap-1 text-xs md:text-sm">
                                 <span className="font-semibold text-muted-foreground">Estimated Area:</span>
                                 <span className="font-bold text-primary">
-                                  {space.totalArea.toFixed(2)} {space.unit || 'cm'}²
+                                  {space.totalArea.toFixed(2)} {space.unit || 'in'}²
                                 </span>
                               </div>
                             )}
@@ -341,32 +357,37 @@ export const StepThree = ({
         </div>
       </Card>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between pt-4">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          size="lg"
-          disabled={submitting}
-          className="animate-pulse"
-        >
-          Back
-        </Button>
-        <Button
-          onClick={handleFinish}
-          size="lg"
-          className={`px-10 ${calendlyEventScheduled && !submitting ? 'animate-pulse' : ''}`}
-          disabled={submitting || !calendlyEventScheduled}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Request"
-          )}
-        </Button>
+      {/* Spacer for floating buttons */}
+      <div className="h-20" />
+
+      {/* Floating Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 z-50">
+        <div className="max-w-5xl mx-auto flex justify-between">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            size="lg"
+            disabled={submitting}
+            className="animate-pulse"
+          >
+            Back
+          </Button>
+          <Button
+            onClick={handleFinish}
+            size="lg"
+            className={`px-10 ${calendlyEventScheduled && !submitting ? 'animate-pulse' : ''}`}
+            disabled={submitting || !calendlyEventScheduled}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Request"
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
