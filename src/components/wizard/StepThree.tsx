@@ -115,7 +115,7 @@ export const StepThree = ({
           body: {
             clientEmail: editedFormData.email,
             clientName: editedFormData.fullName,
-            adminEmail: "admin@yourcompany.com",
+            adminEmail: "saminew3919@gmail.com",
             submissionData: {
               fullName: editedFormData.fullName,
               email: editedFormData.email,
