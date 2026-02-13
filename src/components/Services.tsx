@@ -37,28 +37,28 @@ export const Services = () => {
       title: "Garage Systems",
       description:
         "Transform your garage into an organized workspace with professional storage systems and workbenches.",
-      imagePath: "garage-systems.jpg",
+      imagePath: "custom-closets.JPEG",
       features: ["Wall Systems", "Overhead Storage", "Workbenches", "Tool Organization"],
     },
     {
       title: "Kitchen Cabinets",
       description:
         "High-quality, custom kitchen cabinets tailored to your style and storage needs.",
-      imagePath: "kitchen-cabinets.jpg",
+      imagePath: "kitchen-design.jpg",
       features: ["Custom Sizes", "Premium Materials", "Soft-Close Drawers", "Modern & Classic Styles"],
     },
     {
       title: "Bedroom Storage",
       description:
         "Maximize bedroom space with custom wardrobes, under-bed storage, and shelving solutions.",
-      imagePath: "bedroom-storage.jpg",
+      imagePath: "custom-closets.JPEG",
       features: ["Built-in Wardrobes", "Under-Bed Drawers", "Floating Shelves", "Closet Organizers"],
     },
     {
       title: "Shoe Storage",
       description:
         "Keep your footwear organized and accessible with custom shoe racks and display solutions.",
-      imagePath: "shoe-storage.jpg",
+      imagePath: "kitchen-design.jpg",
       features: ["Shoe Racks", "Display Shelves", "Pull-out Drawers", "Adjustable Shelving"],
     },
   ];
