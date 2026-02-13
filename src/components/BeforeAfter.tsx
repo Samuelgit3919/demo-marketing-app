@@ -3,43 +3,50 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import before from "@/assets/beforeAfter/before1.jpg";
+import after from "@/assets/beforeAfter/after1.jpg";
+import before2 from "@/assets/beforeAfter/before2.jpg";
+import after2 from "@/assets/beforeAfter/after2.jpg";
+import before3 from "@/assets/beforeAfter/before3.jpeg";
+import after3 from "@/assets/beforeAfter/after3.jpeg";
+
 
 const projects = [
   {
     id: 1,
-    before: "https://i.pinimg.com/1200x/77/3e/bf/773ebfe517df884b2935e7fb338b333c.jpg",
-    after: "https://i.pinimg.com/736x/7c/4b/20/7c4b2024860c5b62c1dfd85157c74351.jpg",
-    thumbnail: "https://i.pinimg.com/1200x/9f/2b/ba/9f2bba36bc0e61a6ccc8c0d83a8bcef7.jpg",
+    before: before,
+    after: after,
+    thumbnail: after,
   },
   {
     id: 2,
-    before: "https://i.pinimg.com/1200x/98/26/30/9826306fbc906e33a249cc4944ba9759.jpg",
-    after: "https://i.pinimg.com/1200x/01/2e/11/012e114ce36e37e8b30936f068a64f43.jpg",
-    thumbnail: "https://i.pinimg.com/1200x/8d/9b/91/8d9b91e04629c08002e307232baaef7c.jpg",
+    before: before2,
+    after: after2,
+    thumbnail: after2,
   },
   {
     id: 3,
-    before: "https://i.pinimg.com/1200x/81/b6/b1/81b6b130e736a41c9b7f638c0b718766.jpg",
-    after: "https://i.pinimg.com/736x/ce/85/21/ce852105f77bb7d802853d4a77b77cb1.jpg",
-    thumbnail: "https://i.pinimg.com/736x/46/03/35/460335456cfb1f6910a8e933110fa8c4.jpg",
+    before: before3,
+    after: after3,
+    thumbnail: after3,
   },
   {
     id: 4,
-    before: "https://i.pinimg.com/1200x/77/3e/bf/773ebfe517df884b2935e7fb338b333c.jpg",
-    after: "https://i.pinimg.com/736x/7c/4b/20/7c4b2024860c5b62c1dfd85157c74351.jpg",
-    thumbnail: "https://i.pinimg.com/1200x/9f/2b/ba/9f2bba36bc0e61a6ccc8c0d83a8bcef7.jpg",
+    before: before,
+    after: after,
+    thumbnail: after
   },
   {
     id: 5,
-    before: "https://i.pinimg.com/1200x/98/26/30/9826306fbc906e33a249cc4944ba9759.jpg",
-    after: "https://i.pinimg.com/1200x/01/2e/11/012e114ce36e37e8b30936f068a64f43.jpg",
-    thumbnail: "https://i.pinimg.com/1200x/8d/9b/91/8d9b91e04629c08002e307232baaef7c.jpg",
+    before: before2,
+    after: after2,
+    thumbnail: after2,
   },
   {
     id: 6,
-    before: "https://i.pinimg.com/1200x/81/b6/b1/81b6b130e736a41c9b7f638c0b718766.jpg",
-    after: "https://i.pinimg.com/736x/ce/85/21/ce852105f77bb7d802853d4a77b77cb1.jpg",
-    thumbnail: "https://i.pinimg.com/736x/46/03/35/460335456cfb1f6910a8e933110fa8c4.jpg",
+    before: before3,
+    after: after3,
+    thumbnail: after3,
   },
 ];
 
@@ -165,11 +172,11 @@ export const BeforeAfter = () => {
 
               {/* Before Image */}
               <img
-                src={activeProject.before}
-                alt="Before transformation"
+                src={activeProject.after}
+                alt="After transformation"
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                style={{ opacity: imagesLoaded.before ? 1 : 0 }}
-                onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
+                style={{ opacity: imagesLoaded.after ? 1 : 0 }}
+                onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
               />
 
               {/* After Image with clip */}
@@ -180,12 +187,13 @@ export const BeforeAfter = () => {
                   transition: isDragging ? 'none' : 'clip-path 0.1s ease-out'
                 }}
               >
+
                 <img
-                  src={activeProject.after}
-                  alt="After transformation"
+                  src={activeProject.before}
+                  alt="Before transformation"
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                  style={{ opacity: imagesLoaded.after ? 1 : 0 }}
-                  onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
+                  style={{ opacity: imagesLoaded.before ? 1 : 0 }}
+                  onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
                 />
               </div>
 

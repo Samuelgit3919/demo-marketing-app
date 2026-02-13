@@ -33,13 +33,22 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     return usZip.test(cleaned) || canadianPostal.test(cleaned);
   };
 
-  // Check if form is valid (phone is optional)
+  // Validate name: at least 2 letters
+  const validateName = (name: string) => {
+    return name.trim().length >= 3 && /^[a-zA-Z\s]+$/.test(name);
+  };
+
+  // Validate email: must have @ and a valid domain extension
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email);
+  };
+
+  // Check if form is valid (phone is optional but if provided must be 10 digits)
   const isFormValid = () => {
     const phoneValid = formData.phone.trim() === '' || validatePhone(formData.phone);
     return (
-      formData.fullName.trim() !== '' &&
-      formData.email.trim() !== '' &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      validateName(formData.fullName) &&
+      validateEmail(formData.email) &&
       phoneValid &&
       validatePostalCode(formData.postalCode)
     );
@@ -49,14 +58,14 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Name is required";
+    if (!validateName(formData.fullName)) {
+      newErrors.fullName = "Name must be  2 characters";
     }
-    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Valid email is required";
+    if (!validateEmail(formData.email)) {
+      newErrors.email = "Enter a valid email (e.g. name@example.com)";
     }
     if (formData.phone.trim() !== '' && !validatePhone(formData.phone)) {
-      newErrors.phone = "Phone must contain exactly 10 digits";
+      newErrors.phone = "Phone must be exactly 10 digits";
     }
     if (!validatePostalCode(formData.postalCode)) {
       newErrors.postalCode = "Enter a valid US or Canadian postal code";
@@ -71,12 +80,18 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     onNext();
   };
 
-  // Clear error when user starts typing
+  // Validate on change and show inline errors
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: '' });
+    const newErrors = { ...errors };
+    if (field === 'fullName') {
+      newErrors.fullName = value.trim().length > 0 && !validateName(value) ? "Name must be at least 2 characters" : "";
+    } else if (field === 'email') {
+      newErrors.email = value.trim().length > 0 && !validateEmail(value) ? "Enter a valid email (e.g. name@example.com)" : "";
+    } else if (field === 'phone') {
+      newErrors.phone = value.trim().length > 0 && !validatePhone(value) ? "Phone must be exactly 10 digits" : "";
     }
+    setErrors(newErrors);
   };
 
   return (
