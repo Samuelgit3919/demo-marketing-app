@@ -1,4 +1,4 @@
-project_id = "fvtmueqwsihctwwxufbw"
+project_id = "jhthxqgeqtflidyenxmx"
 
-[functions.send-submission-emails]
+[functions.cloudinary-images]
 verify_jwt = false

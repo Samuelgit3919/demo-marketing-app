@@ -10,7 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
-import { Search, Download, LogOut, Loader2 } from "lucide-react";
+import { Search, Download, LogOut, Loader2, Upload, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { Session } from "@supabase/supabase-js";
 
 interface Submission {
@@ -163,6 +174,21 @@ const Admin = () => {
     }
   };
 
+  const deleteSubmission = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('submissions')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Submission deleted');
+      fetchSubmissions();
+    } catch (error) {
+      console.error('Error deleting submission:', error);
+      toast.error('Failed to delete submission');
+    }
+  };
+
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -221,10 +247,16 @@ const Admin = () => {
               <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
               <p className="text-muted-foreground">Review and manage client submissions</p>
             </div>
-            <Button onClick={handleLogout} variant="outline">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => navigate("/file-manager")} variant="outline">
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Files
+              </Button>
+              <Button onClick={handleLogout} variant="outline">
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
 
           {/* Filters */}
@@ -284,6 +316,30 @@ const Admin = () => {
                         <span className="text-sm text-muted-foreground">
                           {format(new Date(submission.created_at), 'MMM d, yyyy')}
                         </span>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Submission</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the submission from <strong>{submission.full_name}</strong>. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => deleteSubmission(submission.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
 
@@ -302,39 +358,50 @@ const Admin = () => {
 
                     {/* Meeting Details */}
                     {submission.meeting_date && submission.meeting_link && (
-                      <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 p-4">
-                        <p className="text-sm font-semibold mb-3 text-green-900 dark:text-green-100">
-                          📅 Scheduled Meeting
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-4">
+                      <Card className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-lg">🗓️</span>
+                          <p className="text-base font-semibold text-emerald-900 dark:text-emerald-100">
+                            Scheduled Meeting
+                          </p>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
                           <div>
-                            <p className="text-xs font-medium text-green-800 dark:text-green-200 mb-1">
+                            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300 mb-2">
                               Date & Time
                             </p>
-                            <p className="text-sm text-green-900 dark:text-green-100">
-                              {format(new Date(submission.meeting_date), 'PPP p')}
+                            <p className="text-base font-semibold text-emerald-900 dark:text-emerald-50">
+                              {format(new Date(submission.meeting_date), 'MMMM do, yyyy h:mm a')}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-green-800 dark:text-green-200 mb-1">
+                            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300 mb-2">
                               Platform
                             </p>
-                            <p className="text-sm text-green-900 dark:text-green-100 capitalize">
+                            <p className="text-base font-semibold text-emerald-900 dark:text-emerald-50 capitalize">
                               {submission.meeting_platform || 'Video Call'}
                             </p>
                           </div>
                         </div>
-                        <div className="mt-3">
+                        <div className="mt-5 space-y-3">
                           <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700"
+                            size="default"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                             onClick={() => window.open(submission.meeting_link!, '_blank')}
                           >
                             Join Meeting
                           </Button>
-                          <p className="text-xs text-green-700 dark:text-green-300 mt-2">
-                            Link: {submission.meeting_link}
-                          </p>
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Link:</span>
+                            <a
+                              href={submission.meeting_link!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline break-all"
+                            >
+                              {submission.meeting_link}
+                            </a>
+                          </div>
                         </div>
                       </Card>
                     )}
@@ -426,8 +493,6 @@ const Admin = () => {
                         </div>
                       </div>
                     )}
-
-
 
                     {submission.additional_notes && (
                       <div>

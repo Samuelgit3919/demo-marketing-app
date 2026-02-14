@@ -11,6 +11,7 @@ import before3 from "@/assets/beforeAfter/before3.jpeg";
 import after3 from "@/assets/beforeAfter/after3.jpeg";
 
 
+
 const projects = [
   {
     id: 1,
@@ -115,6 +116,28 @@ export const BeforeAfter = () => {
     setSliderPosition(50);
   }, [activeProject]);
 
+  useEffect(() => {
+    const fetchImages = async () => {
+      const { data: files, error } = await supabase
+        .storage
+        .from("services-images")
+        .list("beforeafter", {
+          limit: 100,
+          offset: 0,
+        });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      console.log(files);
+    };
+
+    fetchImages();
+  }, []);
+
+
   return (
     <section
       ref={elementRef as React.RefObject<HTMLElement>}
@@ -145,7 +168,7 @@ export const BeforeAfter = () => {
         {/* Preview Panel */}
         <div className={`mb-16 flex justify-center items-center transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
-          <div className="w-full max-w-5xl rounded-3xl overflow-hidden bg-card shadow-elegant border border-border/50 p-2 transition-all duration-500 hover:shadow-2xl hover:scale-[1.01]">
+          <div className="w-full max-w-5xl rounded-2xl overflow-hidden bg-card shadow-elegant border border-border/50 p-2 transition-all duration-500 hover:shadow-2xl hover:scale-[1.01]">
             <div
               className="relative rounded-2xl overflow-hidden aspect-video cursor-ew-resize select-none group focus:outline-none focus:ring-4 focus:ring-accent/50"
               tabIndex={0}
@@ -174,7 +197,7 @@ export const BeforeAfter = () => {
               <img
                 src={activeProject.after}
                 alt="After transformation"
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300"
                 style={{ opacity: imagesLoaded.after ? 1 : 0 }}
                 onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
               />
@@ -191,7 +214,7 @@ export const BeforeAfter = () => {
                 <img
                   src={activeProject.before}
                   alt="Before transformation"
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300"
                   style={{ opacity: imagesLoaded.before ? 1 : 0 }}
                   onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
                 />
@@ -228,6 +251,8 @@ export const BeforeAfter = () => {
             </div>
           </div>
         </div>
+
+
 
         {/* Horizontal Slider with Navigation */}
         <div className={`relative transition-all  duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'

@@ -92,6 +92,36 @@ export type Database = {
         }
         Relationships: []
       }
+      transformation_projects: {
+        Row: {
+          after_image_url: string
+          before_image_url: string
+          created_at: string
+          display_order: number
+          id: string
+          thumbnail_url: string
+          title: string | null
+        }
+        Insert: {
+          after_image_url: string
+          before_image_url: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          thumbnail_url: string
+          title?: string | null
+        }
+        Update: {
+          after_image_url?: string
+          before_image_url?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          thumbnail_url?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

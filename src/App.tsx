@@ -12,6 +12,7 @@ import HowItWorks from "./pages/HowItWorks";
 import AboutUs from "./pages/AboutUs";
 import Gallery from "./pages/Gallery";
 import { useEffect } from "react";
+import FileManager from "./pages/FileManager";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/file-manager" element={<FileManager />} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about-us" element={<AboutUs />} />
