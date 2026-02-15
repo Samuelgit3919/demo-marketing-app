@@ -240,6 +240,7 @@ const FileManager = () => {
                 created_at: item.created_at,
                 title: item.title,
                 type: item.type,
+                resource_type: "image",
                 description: item.description
             }));
 
@@ -252,6 +253,7 @@ const FileManager = () => {
                 created_at: item.created_at,
                 title: item.title,
                 type: item.type,
+                resource_type: "image",
                 description: item.description
             }));
 
@@ -265,6 +267,7 @@ const FileManager = () => {
                     created_at: item.created_at,
                     title: item.title,
                     type: item.type,
+                    resource_type: "image",
                     description: item.description
                 },
                 {
@@ -276,15 +279,16 @@ const FileManager = () => {
                     created_at: item.created_at,
                     title: item.title,
                     type: item.type,
+                    resource_type: "image",
                     description: item.description
                 }
             ]);
 
-            const allFiles: FileManagerFile[] = [  
-                ...transformedGallery,  
-                ...transformedServices,  
-                ...transformedBA,  
-            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());  
+            const allFiles: FileManagerFile[] = [
+                ...transformedGallery,
+                ...transformedServices,
+                ...transformedBA,
+            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
             setFiles(allFiles);
 
@@ -393,7 +397,7 @@ const FileManager = () => {
                 setUploadProgress([
                     { fileName: "Uploading comparison...", progress: 20, status: "uploading" }
                 ]);
-                
+
                 await cloudinaryService.uploadBeforeAfter(
                     pendingBeforeFile,
                     pendingAfterFile,
@@ -403,7 +407,7 @@ const FileManager = () => {
                         type: uploadType
                     }
                 );
-                
+
                 toast.success("Comparison uploaded successfully");
             } else {
                 const uploadResults = { success: 0, failed: 0 };
@@ -522,12 +526,12 @@ const FileManager = () => {
             } else if (file.folder === "before-after") {
                 table = "before_after";
                 // Extract the base before_after record ID by stripping only the "-before"/"-after" suffix  
-                idToDelete = file.id.replace(/-(before|after)$/, "");  
-                
-                const { data: record } = await supabase  
-                    .from("before_after")  
-                    .select("*")  
-                    .eq("id", idToDelete)  
+                idToDelete = file.id.replace(/-(before|after)$/, "");
+
+                const { data: record } = await supabase
+                    .from("before_after")
+                    .select("*")
+                    .eq("id", idToDelete)
                     .maybeSingle();
                 if (record) {
                     publicIds = [record.before_public_id, record.after_public_id];
@@ -553,10 +557,10 @@ const FileManager = () => {
     const handlePreview = (file: FileManagerFile) => {
         setPreviewUrl(file.url);
         setPreviewType(
-            file.folder === "gallery" || 
-            file.folder === "service" || 
-            file.folder === "before-after" 
-                ? "image" 
+            file.folder === "gallery" ||
+                file.folder === "service" ||
+                file.folder === "before-after"
+                ? "image"
                 : (file.resource_type || "")
         );
         setPreviewName(file.original_name || file.public_id);
@@ -569,9 +573,9 @@ const FileManager = () => {
 
     const getFileIcon = (file: FileManagerFile) => {
         if (
-            file.folder === "gallery" || 
-            file.folder === "service" || 
-            file.folder === "before-after" || 
+            file.folder === "gallery" ||
+            file.folder === "service" ||
+            file.folder === "before-after" ||
             file.resource_type === "image"
         ) {
             return <ImageIcon className="w-5 h-5 text-blue-500" />;
@@ -826,16 +830,16 @@ const FileManager = () => {
 
             {/* Preview Dialog */}
             <Dialog open={!!previewUrl} onOpenChange={() => setPreviewUrl(null)}>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-5xl w-full">
                     <DialogHeader>
                         <DialogTitle>{previewName}</DialogTitle>
                     </DialogHeader>
-                    <div className="flex items-center justify-center max-h-[70vh] overflow-auto">
+                    <div className="flex items-center justify-center max-h-[85vh] overflow-auto">
                         {previewType === "image" && previewUrl && (
-                            <img src={previewUrl} alt={previewName} className="max-w-full max-h-[65vh] rounded" />
+                            <img src={previewUrl} alt={previewName} className="max-w-full max-h-[80vh] rounded" />
                         )}
                         {previewType === "video" && previewUrl && (
-                            <video src={previewUrl} controls className="max-w-full max-h-[65vh] rounded">
+                            <video src={previewUrl} controls className="max-w-full max-h-[80vh] rounded">
                                 Your browser does not support the video tag.
                             </video>
                         )}
@@ -1034,14 +1038,14 @@ const FileManager = () => {
                                 <div className="grid grid-cols-2 gap-4 pt-2">
                                     <div className="space-y-2">
                                         <Label>Before Image *</Label>
-                                        <div 
+                                        <div
                                             className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/50 overflow-hidden relative"
                                             onClick={() => document.getElementById('before-file-input')?.click()}
                                         >
                                             {pendingBeforeFile ? (
-                                                <img 
-                                                    src={URL.createObjectURL(pendingBeforeFile)} 
-                                                    className="absolute inset-0 w-full h-full object-cover" 
+                                                <img
+                                                    src={URL.createObjectURL(pendingBeforeFile)}
+                                                    className="absolute inset-0 w-full h-full object-cover"
                                                     alt="Before preview"
                                                 />
                                             ) : (
@@ -1051,12 +1055,12 @@ const FileManager = () => {
                                                 </>
                                             )}
                                         </div>
-                                        <input 
-                                            id="before-file-input" 
-                                            type="file" 
+                                        <input
+                                            id="before-file-input"
+                                            type="file"
                                             accept="image/*"
-                                            className="hidden" 
-                                            onChange={(e) => setPendingBeforeFile(e.target.files?.[0] || null)} 
+                                            className="hidden"
+                                            onChange={(e) => setPendingBeforeFile(e.target.files?.[0] || null)}
                                         />
                                         {pendingBeforeFile && (
                                             <p className="text-[10px] text-muted-foreground truncate">{pendingBeforeFile.name}</p>
@@ -1065,14 +1069,14 @@ const FileManager = () => {
 
                                     <div className="space-y-2">
                                         <Label>After Image *</Label>
-                                        <div 
+                                        <div
                                             className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/50 overflow-hidden relative"
                                             onClick={() => document.getElementById('after-file-input')?.click()}
                                         >
                                             {pendingAfterFile ? (
-                                                <img 
-                                                    src={URL.createObjectURL(pendingAfterFile)} 
-                                                    className="absolute inset-0 w-full h-full object-cover" 
+                                                <img
+                                                    src={URL.createObjectURL(pendingAfterFile)}
+                                                    className="absolute inset-0 w-full h-full object-cover"
                                                     alt="After preview"
                                                 />
                                             ) : (
@@ -1082,12 +1086,12 @@ const FileManager = () => {
                                                 </>
                                             )}
                                         </div>
-                                        <input 
-                                            id="after-file-input" 
-                                            type="file" 
+                                        <input
+                                            id="after-file-input"
+                                            type="file"
                                             accept="image/*"
-                                            className="hidden" 
-                                            onChange={(e) => setPendingAfterFile(e.target.files?.[0] || null)} 
+                                            className="hidden"
+                                            onChange={(e) => setPendingAfterFile(e.target.files?.[0] || null)}
                                         />
                                         {pendingAfterFile && (
                                             <p className="text-[10px] text-muted-foreground truncate">{pendingAfterFile.name}</p>
@@ -1166,7 +1170,7 @@ const FileManager = () => {
                             <Button
                                 onClick={handleUploadConfirm}
                                 disabled={
-                                    uploading || 
+                                    uploading ||
                                     ((selectedFolder === "service" || selectedFolder === "gallery") && !uploadTitle.trim()) ||
                                     (selectedFolder === "before-after" && (!uploadTitle.trim() || !pendingBeforeFile || !pendingAfterFile))
                                 }
