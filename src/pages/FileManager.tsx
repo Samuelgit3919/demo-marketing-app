@@ -75,11 +75,9 @@ interface UploadProgress {
 }
 
 const FOLDER_OPTIONS = [
-    { value: "service_images", label: "Service Images", icon: "🖼️" },
-    { value: "Gallery_images", label: "Gallery Images", icon: "📸" },
-    { value: "before_after_images", label: "Before & After Images", icon: "↔️" },
-    { value: "team_members", label: "Team Members", icon: "👥" },
-    { value: "blog_posts", label: "Blog Posts", icon: "📝" },
+    { value: "service_images", label: "Service Images" },
+    { value: "Gallery_images", label: "Gallery Images" },
+    { value: "before_after_images", label: "Before & After Images" },
 ];
 
 const TYPE_OPTIONS = [
@@ -561,7 +559,7 @@ const FileManager = () => {
                                     const stats = getFolderStats(folder.value);
                                     return (
                                         <TabsTrigger key={folder.value} value={folder.value}>
-                                            {folder.icon} {folder.label} ({stats.count})
+                                            {folder.label} ({stats.count})
                                         </TabsTrigger>
                                     );
                                 })}
@@ -687,42 +685,20 @@ const FileManager = () => {
                     <DialogHeader>
                         <DialogTitle>Upload Files</DialogTitle>
                         <DialogDescription>
-                            Fill in the details for {pendingFilesArray.length} file(s)
+                            Select a folder, then fill in the details for {pendingFilesArray.length} file(s)
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
-                        {/* Title */}
+                        {/* Folder Selection */}
                         <div className="space-y-2">
-                            <Label htmlFor="upload-title">Title *</Label>
-                            <Input
-                                id="upload-title"
-                                placeholder="Enter a title..."
-                                value={uploadTitle}
-                                onChange={(e) => setUploadTitle(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Type */}
-                        <div className="space-y-2">
-                            <Label>Type *</Label>
-                            <Select value={uploadType} onValueChange={setUploadType}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {TYPE_OPTIONS.map((opt) => (
-                                        <SelectItem key={opt.value} value={opt.value}>
-                                            {opt.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Folder */}
-                        <div className="space-y-2">
-                            <Label>Folder</Label>
-                            <Select value={selectedFolder} onValueChange={setSelectedFolder}>
+                            <Label>Folder *</Label>
+                            <Select value={selectedFolder} onValueChange={(val) => {
+                                setSelectedFolder(val);
+                                // Reset metadata fields when folder changes
+                                setUploadTitle("");
+                                setUploadType("closets");
+                                setUploadDescription("");
+                            }}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select folder" />
                                 </SelectTrigger>
@@ -732,7 +708,7 @@ const FileManager = () => {
                                         return (
                                             <SelectItem key={opt.value} value={opt.value}>
                                                 <span className="flex items-center gap-2">
-                                                    {opt.icon} {opt.label}
+                                                    {opt.label}
                                                     <span className="text-muted-foreground text-xs">
                                                         ({stats.count} files)
                                                     </span>
@@ -744,33 +720,224 @@ const FileManager = () => {
                             </Select>
                         </div>
 
-                        {/* Description */}
-                        <div className="space-y-2">
-                            <Label htmlFor="upload-description">Description</Label>
-                            <Textarea
-                                id="upload-description"
-                                placeholder="Enter a description..."
-                                value={uploadDescription}
-                                onChange={(e) => setUploadDescription(e.target.value)}
-                                rows={3}
-                            />
-                        </div>
-
-                        {/* Selected Files Preview */}
-                        <div className="rounded-md border p-3 max-h-32 overflow-auto space-y-1">
-                            <p className="text-xs font-medium text-muted-foreground mb-1">
-                                Selected image(s):
-                            </p>
-                            {pendingFilesArray.map((file, index) => (
-                                <div key={index} className="flex items-center gap-2 text-sm">
-                                    <ImageIcon className="w-3 h-3 shrink-0 text-muted-foreground" />
-                                    <span className="truncate">{file.name}</span>
-                                    <span className="text-muted-foreground text-xs shrink-0">
-                                        ({formatSize(file.size)})
-                                    </span>
+                        {/* Service Images fields */}
+                        {selectedFolder === "service_images" && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-title">Service Title *</Label>
+                                    <Input
+                                        id="upload-title"
+                                        placeholder="e.g. Kitchen Cabinets"
+                                        value={uploadTitle}
+                                        onChange={(e) => setUploadTitle(e.target.value)}
+                                    />
                                 </div>
-                            ))}
-                        </div>
+
+                                <div className="space-y-2">
+                                    <Label>Category *</Label>
+                                    <Select value={uploadType} onValueChange={setUploadType}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {TYPE_OPTIONS.map((opt) => (
+                                                <SelectItem key={opt.value} value={opt.value}>
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Image Preview */}
+                                {pendingFilesArray.length > 0 && (
+                                    <div className="space-y-2">
+                                        <Label>Image Preview</Label>
+                                        <div className="rounded-lg border overflow-hidden bg-muted">
+                                            <img
+                                                src={URL.createObjectURL(pendingFilesArray[0])}
+                                                alt="Preview"
+                                                className="w-full h-48 object-cover"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {pendingFilesArray[0].name} ({formatSize(pendingFilesArray[0].size)})
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-description">Description</Label>
+                                    <Textarea
+                                        id="upload-description"
+                                        placeholder="Describe the service features (e.g. Custom Sizes, Premium Materials...)"
+                                        value={uploadDescription}
+                                        onChange={(e) => setUploadDescription(e.target.value)}
+                                        rows={4}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Gallery Images fields */}
+                        {selectedFolder === "Gallery_images" && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-title">Project Title *</Label>
+                                    <Input
+                                        id="upload-title"
+                                        placeholder="e.g. Project 1"
+                                        value={uploadTitle}
+                                        onChange={(e) => setUploadTitle(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Type *</Label>
+                                    <Select value={uploadType} onValueChange={setUploadType}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {TYPE_OPTIONS.map((opt) => (
+                                                <SelectItem key={opt.value} value={opt.value}>
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Image Preview */}
+                                {pendingFilesArray.length > 0 && (
+                                    <div className="space-y-2">
+                                        <Label>Image Preview</Label>
+                                        <div className="rounded-lg border overflow-hidden bg-muted">
+                                            <img
+                                                src={URL.createObjectURL(pendingFilesArray[0])}
+                                                alt="Preview"
+                                                className="w-full h-48 object-cover"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {pendingFilesArray[0].name} ({formatSize(pendingFilesArray[0].size)})
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-description">Description</Label>
+                                    <Textarea
+                                        id="upload-description"
+                                        placeholder="e.g. Custom cabinetry and closet design"
+                                        value={uploadDescription}
+                                        onChange={(e) => setUploadDescription(e.target.value)}
+                                        rows={3}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Before & After Images fields */}
+                        {selectedFolder === "before_after_images" && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-title">Title *</Label>
+                                    <Input
+                                        id="upload-title"
+                                        placeholder="e.g. Kitchen Renovation"
+                                        value={uploadTitle}
+                                        onChange={(e) => setUploadTitle(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Type *</Label>
+                                    <Select value={uploadType} onValueChange={setUploadType}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {TYPE_OPTIONS.map((opt) => (
+                                                <SelectItem key={opt.value} value={opt.value}>
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Image Preview */}
+                                {pendingFilesArray.length > 0 && (
+                                    <div className="space-y-2">
+                                        <Label>Image Preview</Label>
+                                        <div className="rounded-lg border overflow-hidden bg-muted">
+                                            <img
+                                                src={URL.createObjectURL(pendingFilesArray[0])}
+                                                alt="Preview"
+                                                className="w-full h-48 object-cover"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {pendingFilesArray[0].name} ({formatSize(pendingFilesArray[0].size)})
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-description">Description</Label>
+                                    <Textarea
+                                        id="upload-description"
+                                        placeholder="e.g. Before and after of a full kitchen remodel"
+                                        value={uploadDescription}
+                                        onChange={(e) => setUploadDescription(e.target.value)}
+                                        rows={3}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Other folders - minimal fields */}
+                        {selectedFolder !== "service_images" && selectedFolder !== "Gallery_images" && selectedFolder !== "before_after_images" && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-title">Title</Label>
+                                    <Input
+                                        id="upload-title"
+                                        placeholder="Enter a title..."
+                                        value={uploadTitle}
+                                        onChange={(e) => setUploadTitle(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="upload-description">Description</Label>
+                                    <Textarea
+                                        id="upload-description"
+                                        placeholder="Enter a description..."
+                                        value={uploadDescription}
+                                        onChange={(e) => setUploadDescription(e.target.value)}
+                                        rows={3}
+                                    />
+                                </div>
+
+                                {/* Selected Files Preview */}
+                                <div className="rounded-md border p-3 max-h-32 overflow-auto space-y-1">
+                                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                                        Selected file(s):
+                                    </p>
+                                    {pendingFilesArray.map((file, index) => (
+                                        <div key={index} className="flex items-center gap-2 text-sm">
+                                            <ImageIcon className="w-3 h-3 shrink-0 text-muted-foreground" />
+                                            <span className="truncate">{file.name}</span>
+                                            <span className="text-muted-foreground text-xs shrink-0">
+                                                ({formatSize(file.size)})
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
 
                         <div className="flex justify-end gap-2">
                             <Button
@@ -785,7 +952,7 @@ const FileManager = () => {
                             </Button>
                             <Button
                                 onClick={handleUploadConfirm}
-                                disabled={uploading || !uploadTitle.trim()}
+                                disabled={uploading || ((selectedFolder === "service_images" || selectedFolder === "Gallery_images" || selectedFolder === "before_after_images") && !uploadTitle.trim())}
                             >
                                 {uploading ? (
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
