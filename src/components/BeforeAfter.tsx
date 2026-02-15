@@ -11,9 +11,16 @@ import after2 from "@/assets/beforeAfter/after2.jpg";
 import before3 from "@/assets/beforeAfter/before3.jpeg";
 import after3 from "@/assets/beforeAfter/after3.jpeg";
 
+interface ProjectItem {
+  id: number;
+  before: string;
+  after: string;
+  thumbnail: string;
+  title?: string;
+  description?: string;
+}
 
-
-const DEFAULT_PROJECTS = [
+const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 1,
     before: before,
@@ -63,8 +70,8 @@ export const BeforeAfter = () => {
     [Autoplay({ delay: 3000, stopOnInteraction: true })]
   );
   
-  const [projects, setProjects] = useState<any[]>(DEFAULT_PROJECTS);
-  const [activeProject, setActiveProject] = useState<any>(DEFAULT_PROJECTS[0]);
+  const [projects, setProjects] = useState<ProjectItem[]>(DEFAULT_PROJECTS);
+  const [activeProject, setActiveProject] = useState<ProjectItem>(DEFAULT_PROJECTS[0]);
   const [loading, setLoading] = useState(true);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);

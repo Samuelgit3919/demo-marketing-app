@@ -7,7 +7,7 @@ import { cloudinaryService } from "@/lib/cloudinaryService";
 import { type GalleryItem } from "@/types/cloudinary";
 import { Loader2 } from "lucide-react";
 
-type RoomType = "all" | "closet" | "kitchen" | "garage";
+type RoomType = "all" | "closet" | "kitchen" | "garage" | "other";
 
 const Gallery = () => {
   const [selectedFilter, setSelectedFilter] = useState<RoomType>("all");

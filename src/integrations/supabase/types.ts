@@ -222,8 +222,6 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       gallery_item_type:
-        | "image"
-        | "video"
         | "closet"
         | "kitchen"
         | "garage"

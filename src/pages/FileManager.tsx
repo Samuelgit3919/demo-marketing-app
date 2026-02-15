@@ -280,11 +280,13 @@ const FileManager = () => {
                 }
             ]);
 
-            setFiles([
-                ...transformedGallery, 
-                ...transformedServices, 
-                ...transformedBA
-            ]);
+            const allFiles: FileManagerFile[] = [  
+                ...transformedGallery,  
+                ...transformedServices,  
+                ...transformedBA,  
+            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());  
+
+            setFiles(allFiles);
 
             if (showToast) {
                 toast.success("Files refreshed successfully");
@@ -356,7 +358,7 @@ const FileManager = () => {
         if (valid.length > 0) {
             setPendingFilesArray(valid);
             setUploadTitle("");
-            setUploadType("closets");
+            setUploadType("closet");
             setUploadDescription("");
             setSelectedFolder("service");
             setShowFolderDialog(true);
@@ -519,9 +521,14 @@ const FileManager = () => {
                 table = "services";
             } else if (file.folder === "before-after") {
                 table = "before_after";
-                idToDelete = file.id.split('-')[0];
+                // Extract the base before_after record ID by stripping only the "-before"/"-after" suffix  
+                idToDelete = file.id.replace(/-(before|after)$/, "");  
                 
-                const { data: record } = await supabase.from("before_after").select("*").eq("id", idToDelete).maybeSingle();
+                const { data: record } = await supabase  
+                    .from("before_after")  
+                    .select("*")  
+                    .eq("id", idToDelete)  
+                    .maybeSingle();
                 if (record) {
                     publicIds = [record.before_public_id, record.after_public_id];
                 }

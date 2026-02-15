@@ -8,7 +8,14 @@ import BedDesign from "@/assets/bed_design.jpg";
 import ShoesDesign from "@/assets/shoes-design.jpg";
 import { type ServiceItem, cloudinaryService } from "@/lib/cloudinaryService";
 
-const DEFAULT_SERVICES = [
+interface ServiceViewModel {
+  title: string;
+  description: string;
+  image: string;
+  features: string[];
+}
+
+const DEFAULT_SERVICES: ServiceViewModel[] = [
   {
     title: "Custom Closets",
     description: "Walk-in closets, reach-in closets, and wardrobe systems designed to maximize space and style.",
@@ -51,7 +58,7 @@ export const Services = () => {
   const [selectedService, setSelectedService] = useState(0);
   const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
 
-  const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
+  const [services, setServices] = useState<ServiceViewModel[]>(DEFAULT_SERVICES);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,12 +67,13 @@ export const Services = () => {
         const data = await cloudinaryService.fetchServices();
         if (data && data.length > 0) {
           // Transform if necessary, or just use as is if schema matches
-          setServices(data.map(item => ({
+          const transformed: ServiceViewModel[] = data.map(item => ({
             title: item.title,
             description: item.description || "",
             image: item.image_url,
             features: ["Professional Design", "Custom Solution", "Quality Materials"] // Fallback features
-          })));
+          }));
+          setServices(transformed);
         }
       } catch (error) {
         console.error("Failed to fetch services:", error);

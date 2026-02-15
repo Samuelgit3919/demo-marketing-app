@@ -110,6 +110,19 @@ export const cloudinaryService = {
     data: { title: string; description?: string; type: string },
     retries = 3
   ): Promise<void> {
+    let beforePublicId: string | null = null;
+    let afterPublicId: string | null = null;
+
+    const cleanupUploads = async (publicIds: string[]) => {
+      for (const publicId of publicIds) {
+        try {
+          await supabase.functions.invoke("cloudinary-delete", { body: { publicId } });
+        } catch (cleanupError) {
+          console.warn(`Failed to cleanup Cloudinary asset ${publicId}:`, cleanupError);
+        }
+      }
+    };
+
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         // 1. Upload Before image
@@ -122,6 +135,8 @@ export const cloudinaryService = {
         });
         if (beforeErr) throw beforeErr;
 
+        beforePublicId = (beforeRes as any).public_id;
+
         // 2. Upload After image
         const afterFormData = new FormData();
         afterFormData.append("file", afterFile);
@@ -130,7 +145,13 @@ export const cloudinaryService = {
         const { data: afterRes, error: afterErr } = await supabase.functions.invoke('cloudinary-upload', {
           body: afterFormData
         });
-        if (afterErr) throw afterErr;
+        if (afterErr) {
+          // Cleanup before image if after upload fails
+          if (beforePublicId) await cleanupUploads([beforePublicId]);
+          throw afterErr;
+        }
+
+        afterPublicId = (afterRes as any).public_id;
 
         // 3. Create DB record
         const { error: dbError } = await supabase
@@ -140,13 +161,18 @@ export const cloudinaryService = {
             description: data.description || null,
             type: data.type as any,
             before_image_url: (beforeRes as any).url,
-            before_public_id: (beforeRes as any).public_id,
+            before_public_id: beforePublicId,
             after_image_url: (afterRes as any).url,
-            after_public_id: (afterRes as any).public_id,
+            after_public_id: afterPublicId,
             is_active: true
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          // Cleanup both images if DB insert fails
+          await cleanupUploads([beforePublicId, afterPublicId].filter(Boolean) as string[]);
+          throw dbError;
+        }
+
         return;
       } catch (error) {
         console.error(`Upload before_after attempt ${attempt} failed:`, error);
