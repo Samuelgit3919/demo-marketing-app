@@ -48,19 +48,16 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Session } from "@supabase/supabase-js";
+import { cloudinaryService, CLOUDINARY_FOLDERS } from "@/lib/cloudinaryService";
 
-interface CloudinaryFile {
+interface FileManagerFile {
     id: string;
     url: string;
     public_id: string;
-    format: string | null;
-    resource_type: string | null;
-    bytes: number;
-    width: number | null;
-    height: number | null;
-    original_name: string | null;
     folder: string | null;
     created_at: string;
+    resource_type?: string | null;
+    original_name?: string | null;
     uploaded_by?: string;
     title?: string | null;
     type?: string | null;
@@ -75,16 +72,16 @@ interface UploadProgress {
 }
 
 const FOLDER_OPTIONS = [
-    { value: "service_images", label: "Service Images" },
-    { value: "Gallery_images", label: "Gallery Images" },
-    { value: "before_after_images", label: "Before & After Images" },
+    { value: "service", label: "Service Images" },
+    { value: "gallery", label: "Gallery Images" },
+    { value: "before-after", label: "Before & After Images" }
 ];
 
 const TYPE_OPTIONS = [
-    { value: "closets", label: "Closets" },
-    { value: "kitchens", label: "Kitchens" },
-    { value: "garages", label: "Garages" },
-    { value: "others", label: "Others" },
+    { value: "closet", label: "Closets" },
+    { value: "kitchen", label: "Kitchens" },
+    { value: "garage", label: "Garages" },
+    { value: "other", label: "Others" },
 ];
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
@@ -92,8 +89,8 @@ const MAX_FILES_PER_UPLOAD = 20;
 
 const FileManager = () => {
     const navigate = useNavigate();
-    const [files, setFiles] = useState<CloudinaryFile[]>([]);
-    const [filteredFiles, setFilteredFiles] = useState<CloudinaryFile[]>([]);
+    const [files, setFiles] = useState<FileManagerFile[]>([]);
+    const [filteredFiles, setFilteredFiles] = useState<FileManagerFile[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [session, setSession] = useState<Session | null>(null);
@@ -102,18 +99,20 @@ const FileManager = () => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewType, setPreviewType] = useState("");
     const [previewName, setPreviewName] = useState("");
-    const [selectedFolder, setSelectedFolder] = useState("service_images");
+    const [selectedFolder, setSelectedFolder] = useState("service");
     const [showFolderDialog, setShowFolderDialog] = useState(false);
     const [pendingFilesArray, setPendingFilesArray] = useState<File[]>([]);
     const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
     const [activeTab, setActiveTab] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState<CloudinaryFile | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<FileManagerFile | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [uploadErrors, setUploadErrors] = useState<string[]>([]);
     const [uploadTitle, setUploadTitle] = useState("");
-    const [uploadType, setUploadType] = useState("closets");
+    const [uploadType, setUploadType] = useState("closet");
     const [uploadDescription, setUploadDescription] = useState("");
+    const [pendingBeforeFile, setPendingBeforeFile] = useState<File | null>(null);
+    const [pendingAfterFile, setPendingAfterFile] = useState<File | null>(null);
 
     useEffect(() => {
         const {
@@ -170,13 +169,125 @@ const FileManager = () => {
     const fetchFiles = useCallback(async (showToast = false) => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from("cloudinary_files")
-                .select("*")
-                .order("created_at", { ascending: false });
 
-            if (error) throw error;
-            setFiles((data as CloudinaryFile[]) || []);
+            // 2. Fetch from gallery
+            let galleryFiles: any[] = [];
+            try {
+                const { data, error, status } = await supabase
+                    .from("gallery")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+                if (error) {
+                    if (error.code === "PGRST205" || status === 404) {
+                        console.warn("Table 'gallery' not found.");
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    galleryFiles = data || [];
+                }
+            } catch (err) {
+                console.error("Error fetching gallery:", err);
+            }
+
+            // 3. Fetch from services
+            let serviceFiles: any[] = [];
+            try {
+                const { data, error, status } = await supabase
+                    .from("services")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+                if (error) {
+                    if ((error as any).code === "PGRST205" || status === 404) {
+                        console.warn("Table 'services' not found.");
+                    } else {
+                        console.error("Services fetch error:", error);
+                    }
+                } else {
+                    serviceFiles = data || [];
+                }
+            } catch (err) {
+                console.error("Error fetching services:", err);
+            }
+
+            // 4. Fetch from before_after
+            let baFiles: any[] = [];
+            try {
+                const { data, error, status } = await supabase
+                    .from("before_after")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+                if (error) {
+                    if ((error as any).code === "PGRST205" || status === 404) {
+                        console.warn("Table 'before_after' not found.");
+                    } else {
+                        console.error("Before/After fetch error:", error);
+                    }
+                } else {
+                    baFiles = data || [];
+                }
+            } catch (err) {
+                console.error("Error fetching before_after:", err);
+            }
+
+            // Transform specialized records to match FileManagerFile interface for the UI
+            const transformedGallery: FileManagerFile[] = (galleryFiles || []).map(item => ({
+                id: item.id,
+                url: item.image_url,
+                public_id: item.public_id,
+                original_name: item.title,
+                folder: "gallery",
+                created_at: item.created_at,
+                title: item.title,
+                type: item.type,
+                description: item.description
+            }));
+
+            const transformedServices: FileManagerFile[] = (serviceFiles || []).map(item => ({
+                id: item.id,
+                url: item.image_url,
+                public_id: item.public_id,
+                original_name: item.title,
+                folder: "service",
+                created_at: item.created_at,
+                title: item.title,
+                type: item.type,
+                description: item.description
+            }));
+
+            const transformedBA: FileManagerFile[] = (baFiles || []).flatMap(item => [
+                {
+                    id: `${item.id}-before`,
+                    url: item.before_image_url,
+                    public_id: item.before_public_id,
+                    original_name: `Before: ${item.title}`,
+                    folder: "before-after",
+                    created_at: item.created_at,
+                    title: item.title,
+                    type: item.type,
+                    description: item.description
+                },
+                {
+                    id: `${item.id}-after`,
+                    url: item.after_image_url,
+                    public_id: item.after_public_id,
+                    original_name: `After: ${item.title}`,
+                    folder: "before-after",
+                    created_at: item.created_at,
+                    title: item.title,
+                    type: item.type,
+                    description: item.description
+                }
+            ]);
+
+            const allFiles: FileManagerFile[] = [  
+                ...transformedGallery,  
+                ...transformedServices,  
+                ...transformedBA,  
+            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());  
+
+            setFiles(allFiles);
+
             if (showToast) {
                 toast.success("Files refreshed successfully");
             }
@@ -247,9 +358,9 @@ const FileManager = () => {
         if (valid.length > 0) {
             setPendingFilesArray(valid);
             setUploadTitle("");
-            setUploadType("closets");
+            setUploadType("closet");
             setUploadDescription("");
-            setSelectedFolder("service_images");
+            setSelectedFolder("service");
             setShowFolderDialog(true);
             setUploadProgress(
                 valid.map((file) => ({
@@ -264,94 +375,123 @@ const FileManager = () => {
     };
 
     const handleUploadConfirm = async () => {
-        if (pendingFilesArray.length === 0) return;
+        if (selectedFolder === "before-after") {
+            if (!pendingBeforeFile || !pendingAfterFile || !uploadTitle.trim()) {
+                toast.error("Please provide a title and both Before & After images");
+                return;
+            }
+        } else if (pendingFilesArray.length === 0) {
+            return;
+        }
 
         setShowFolderDialog(false);
         setUploading(true);
         setUploadErrors([]);
 
-        const uploadResults = { success: 0, failed: 0 };
-
         try {
-            for (let i = 0; i < pendingFilesArray.length; i++) {
-                const file = pendingFilesArray[i];
-
-                setUploadProgress((prev) =>
-                    prev.map((p, idx) =>
-                        idx === i ? { ...p, status: "uploading", progress: 0 } : p
-                    )
+            if (selectedFolder === "before-after" && pendingBeforeFile && pendingAfterFile) {
+                setUploadProgress([
+                    { fileName: "Uploading comparison...", progress: 20, status: "uploading" }
+                ]);
+                
+                await cloudinaryService.uploadBeforeAfter(
+                    pendingBeforeFile,
+                    pendingAfterFile,
+                    {
+                        title: uploadTitle,
+                        description: uploadDescription,
+                        type: uploadType
+                    }
                 );
-
-                try {
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    formData.append("folder", `admin-uploads/${selectedFolder}`);
-
-                    const { data, error } = await supabase.functions.invoke(
-                        "cloudinary-upload",
-                        { body: formData }
-                    );
-
-                    if (error) throw error;
-                    if (data?.error) throw new Error(data.error);
+                
+                toast.success("Comparison uploaded successfully");
+            } else {
+                const uploadResults = { success: 0, failed: 0 };
+                for (let i = 0; i < pendingFilesArray.length; i++) {
+                    const file = pendingFilesArray[i];
 
                     setUploadProgress((prev) =>
                         prev.map((p, idx) =>
-                            idx === i ? { ...p, progress: 50 } : p
+                            idx === i ? { ...p, status: "uploading", progress: 0 } : p
                         )
                     );
 
-                    const { error: dbError } = await supabase
-                        .from("cloudinary_files")
-                        .insert({
-                            url: data.url,
-                            public_id: data.public_id,
-                            format: data.format,
-                            resource_type: data.resource_type,
-                            bytes: data.bytes,
-                            width: data.width,
-                            height: data.height,
-                            original_name: file.name,
-                            uploaded_by: session?.user?.id,
-                            folder: selectedFolder,
-                            title: uploadTitle || null,
-                            type: uploadType,
-                            description: uploadDescription || null,
-                        } as any);
+                    try {
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        formData.append("folder", selectedFolder === "gallery" ? CLOUDINARY_FOLDERS.GALLERY : selectedFolder);
 
-                    if (dbError) throw dbError;
+                        const { data, error } = await supabase.functions.invoke(
+                            "cloudinary-upload",
+                            { body: formData }
+                        );
 
-                    setUploadProgress((prev) =>
-                        prev.map((p, idx) =>
-                            idx === i ? { ...p, status: "success", progress: 100 } : p
-                        )
-                    );
+                        if (error) throw error;
+                        if (data?.error) throw new Error(data.error);
 
-                    uploadResults.success++;
-                } catch (error: any) {
-                    console.error(`Error uploading ${file.name}:`, error);
-                    setUploadProgress((prev) =>
-                        prev.map((p, idx) =>
-                            idx === i
-                                ? { ...p, status: "error", error: error?.message || "Upload failed" }
-                                : p
-                        )
-                    );
-                    uploadResults.failed++;
+                        setUploadProgress((prev) =>
+                            prev.map((p, idx) =>
+                                idx === i ? { ...p, progress: 50 } : p
+                            )
+                        );
+
+                        if (selectedFolder === "gallery") {
+                            const { error: dbError } = await supabase
+                                .from("gallery")
+                                .insert({
+                                    image_url: data.url,
+                                    public_id: data.public_id,
+                                    title: uploadTitle || file.name,
+                                    description: uploadDescription || null,
+                                    type: uploadType as any,
+                                });
+                            if (dbError) throw dbError;
+                        } else if (selectedFolder === "service") {
+                            const { error: dbError } = await supabase
+                                .from("services")
+                                .insert({
+                                    image_url: data.url,
+                                    public_id: data.public_id,
+                                    title: uploadTitle || file.name,
+                                    description: uploadDescription || null,
+                                    type: uploadType as any,
+                                });
+                            if (dbError) throw dbError;
+
+                        }
+
+                        setUploadProgress((prev) =>
+                            prev.map((p, idx) =>
+                                idx === i ? { ...p, status: "success", progress: 100 } : p
+                            )
+                        );
+
+                        uploadResults.success++;
+                    } catch (error: any) {
+                        console.error(`Error uploading ${file.name}:`, error);
+                        setUploadProgress((prev) =>
+                            prev.map((p, idx) =>
+                                idx === i
+                                    ? { ...p, status: "error", error: error?.message || "Upload failed" }
+                                    : p
+                            )
+                        );
+                        uploadResults.failed++;
+                    }
+
+                    if (i < pendingFilesArray.length - 1) {
+                        await new Promise((resolve) => setTimeout(resolve, 500));
+                    }
                 }
 
-                if (i < pendingFilesArray.length - 1) {
-                    await new Promise((resolve) => setTimeout(resolve, 500));
+                if (uploadResults.success > 0) {
+                    toast.success(
+                        `${uploadResults.success} file(s) uploaded to ${FOLDER_OPTIONS.find((f) => f.value === selectedFolder)?.label}`
+                    );
                 }
-            }
-
-            if (uploadResults.success > 0) {
-                toast.success(
-                    `${uploadResults.success} file(s) uploaded to ${FOLDER_OPTIONS.find((f) => f.value === selectedFolder)?.label}`
-                );
-            }
-            if (uploadResults.failed > 0) {
-                toast.error(`${uploadResults.failed} file(s) failed to upload`);
+                if (uploadResults.failed > 0) {
+                    toast.error(`${uploadResults.failed} file(s) failed to upload`);
+                }
             }
 
             await fetchFiles();
@@ -362,26 +502,46 @@ const FileManager = () => {
             setUploading(false);
             setTimeout(() => {
                 setPendingFilesArray([]);
+                setPendingBeforeFile(null);
+                setPendingAfterFile(null);
                 setUploadProgress([]);
             }, 3000);
         }
     };
 
-    const handleDelete = async (file: CloudinaryFile) => {
+    const handleDelete = async (file: FileManagerFile) => {
         try {
-            const { error } = await supabase
-                .from("cloudinary_files")
-                .delete()
-                .eq("id", file.id);
+            let table: "gallery" | "services" | "before_after" = "gallery";
+            let publicIds: string[] = [file.public_id];
+            let idToDelete = file.id;
 
-            if (error) throw error;
+            if (file.folder === "gallery") {
+                table = "gallery";
+            } else if (file.folder === "service") {
+                table = "services";
+            } else if (file.folder === "before-after") {
+                table = "before_after";
+                // Extract the base before_after record ID by stripping only the "-before"/"-after" suffix  
+                idToDelete = file.id.replace(/-(before|after)$/, "");  
+                
+                const { data: record } = await supabase  
+                    .from("before_after")  
+                    .select("*")  
+                    .eq("id", idToDelete)  
+                    .maybeSingle();
+                if (record) {
+                    publicIds = [record.before_public_id, record.after_public_id];
+                }
+            }
+
+            await cloudinaryService.deleteItem(idToDelete, table, publicIds);
 
             toast.success(`"${file.original_name || file.public_id}" deleted`);
             setShowDeleteConfirm(null);
             fetchFiles();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Delete error:", error);
-            toast.error("Failed to delete file");
+            toast.error(`Failed to delete file: ${error.message || "Unknown error"}`);
         }
     };
 
@@ -390,9 +550,15 @@ const FileManager = () => {
         toast.success("URL copied to clipboard");
     };
 
-    const handlePreview = (file: CloudinaryFile) => {
+    const handlePreview = (file: FileManagerFile) => {
         setPreviewUrl(file.url);
-        setPreviewType(file.resource_type || "");
+        setPreviewType(
+            file.folder === "gallery" || 
+            file.folder === "service" || 
+            file.folder === "before-after" 
+                ? "image" 
+                : (file.resource_type || "")
+        );
         setPreviewName(file.original_name || file.public_id);
     };
 
@@ -401,9 +567,16 @@ const FileManager = () => {
         fetchFiles(true);
     };
 
-    const getFileIcon = (resourceType: string | null) => {
-        if (resourceType === "image") return <ImageIcon className="w-5 h-5 text-blue-500" />;
-        if (resourceType === "video") return <VideoIcon className="w-5 h-5 text-purple-500" />;
+    const getFileIcon = (file: FileManagerFile) => {
+        if (
+            file.folder === "gallery" || 
+            file.folder === "service" || 
+            file.folder === "before-after" || 
+            file.resource_type === "image"
+        ) {
+            return <ImageIcon className="w-5 h-5 text-blue-500" />;
+        }
+        if (file.resource_type === "video") return <VideoIcon className="w-5 h-5 text-purple-500" />;
         return <FileIcon className="w-5 h-5 text-muted-foreground" />;
     };
 
@@ -417,10 +590,7 @@ const FileManager = () => {
 
     const getFolderStats = (folderValue: string) => {
         const count = files.filter((f) => f.folder === folderValue).length;
-        const totalSize = files
-            .filter((f) => f.folder === folderValue)
-            .reduce((acc, f) => acc + (f.bytes || 0), 0);
-        return { count, totalSize };
+        return { count };
     };
 
     if (checkingAuth || !session) {
@@ -586,16 +756,12 @@ const FileManager = () => {
                             {/* Stats Bar */}
                             <div className="flex items-center justify-between text-sm text-muted-foreground px-1">
                                 <span>{filteredFiles.length} file(s) shown</span>
-                                <span>
-                                    Total size:{" "}
-                                    {formatSize(filteredFiles.reduce((acc, f) => acc + (f.bytes || 0), 0))}
-                                </span>
                             </div>
 
                             {filteredFiles.map((file) => (
                                 <Card key={file.id} className="p-4 flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        {getFileIcon(file.resource_type)}
+                                        {getFileIcon(file)}
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2">
                                                 <p className="text-sm font-medium truncate">
@@ -609,8 +775,6 @@ const FileManager = () => {
                                                 )}
                                             </div>
                                             <p className="text-xs text-muted-foreground">
-                                                {formatSize(file.bytes)} • {file.format?.toUpperCase()} •{" "}
-                                                {file.width && file.height ? `${file.width}×${file.height} • ` : ""}
                                                 {new Date(file.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
@@ -696,7 +860,7 @@ const FileManager = () => {
                                 setSelectedFolder(val);
                                 // Reset metadata fields when folder changes
                                 setUploadTitle("");
-                                setUploadType("closets");
+                                setUploadType("closet");
                                 setUploadDescription("");
                             }}>
                                 <SelectTrigger>
@@ -721,7 +885,7 @@ const FileManager = () => {
                         </div>
 
                         {/* Service Images fields */}
-                        {selectedFolder === "service_images" && (
+                        {selectedFolder === "service" && (
                             <>
                                 <div className="space-y-2">
                                     <Label htmlFor="upload-title">Service Title *</Label>
@@ -780,7 +944,7 @@ const FileManager = () => {
                         )}
 
                         {/* Gallery Images fields */}
-                        {selectedFolder === "Gallery_images" && (
+                        {selectedFolder === "gallery" && (
                             <>
                                 <div className="space-y-2">
                                     <Label htmlFor="upload-title">Project Title *</Label>
@@ -838,8 +1002,8 @@ const FileManager = () => {
                             </>
                         )}
 
-                        {/* Before & After Images fields */}
-                        {selectedFolder === "before_after_images" && (
+                        {/* Before & After Images fields - Specialized UI */}
+                        {selectedFolder === "before-after" && (
                             <>
                                 <div className="space-y-2">
                                     <Label htmlFor="upload-title">Title *</Label>
@@ -867,38 +1031,85 @@ const FileManager = () => {
                                     </Select>
                                 </div>
 
-                                {/* Image Preview */}
-                                {pendingFilesArray.length > 0 && (
+                                <div className="grid grid-cols-2 gap-4 pt-2">
                                     <div className="space-y-2">
-                                        <Label>Image Preview</Label>
-                                        <div className="rounded-lg border overflow-hidden bg-muted">
-                                            <img
-                                                src={URL.createObjectURL(pendingFilesArray[0])}
-                                                alt="Preview"
-                                                className="w-full h-48 object-cover"
-                                            />
+                                        <Label>Before Image *</Label>
+                                        <div 
+                                            className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/50 overflow-hidden relative"
+                                            onClick={() => document.getElementById('before-file-input')?.click()}
+                                        >
+                                            {pendingBeforeFile ? (
+                                                <img 
+                                                    src={URL.createObjectURL(pendingBeforeFile)} 
+                                                    className="absolute inset-0 w-full h-full object-cover" 
+                                                    alt="Before preview"
+                                                />
+                                            ) : (
+                                                <>
+                                                    <Upload className="w-6 h-6 text-muted-foreground" />
+                                                    <span className="text-xs text-muted-foreground font-medium">Select Before</span>
+                                                </>
+                                            )}
                                         </div>
-                                        <p className="text-xs text-muted-foreground">
-                                            {pendingFilesArray[0].name} ({formatSize(pendingFilesArray[0].size)})
-                                        </p>
+                                        <input 
+                                            id="before-file-input" 
+                                            type="file" 
+                                            accept="image/*"
+                                            className="hidden" 
+                                            onChange={(e) => setPendingBeforeFile(e.target.files?.[0] || null)} 
+                                        />
+                                        {pendingBeforeFile && (
+                                            <p className="text-[10px] text-muted-foreground truncate">{pendingBeforeFile.name}</p>
+                                        )}
                                     </div>
-                                )}
+
+                                    <div className="space-y-2">
+                                        <Label>After Image *</Label>
+                                        <div 
+                                            className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/50 overflow-hidden relative"
+                                            onClick={() => document.getElementById('after-file-input')?.click()}
+                                        >
+                                            {pendingAfterFile ? (
+                                                <img 
+                                                    src={URL.createObjectURL(pendingAfterFile)} 
+                                                    className="absolute inset-0 w-full h-full object-cover" 
+                                                    alt="After preview"
+                                                />
+                                            ) : (
+                                                <>
+                                                    <Upload className="w-6 h-6 text-muted-foreground" />
+                                                    <span className="text-xs text-muted-foreground font-medium">Select After</span>
+                                                </>
+                                            )}
+                                        </div>
+                                        <input 
+                                            id="after-file-input" 
+                                            type="file" 
+                                            accept="image/*"
+                                            className="hidden" 
+                                            onChange={(e) => setPendingAfterFile(e.target.files?.[0] || null)} 
+                                        />
+                                        {pendingAfterFile && (
+                                            <p className="text-[10px] text-muted-foreground truncate">{pendingAfterFile.name}</p>
+                                        )}
+                                    </div>
+                                </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="upload-description">Description</Label>
                                     <Textarea
                                         id="upload-description"
-                                        placeholder="e.g. Before and after of a full kitchen remodel"
+                                        placeholder="e.g. Full kitchen overhaul with custom cabinetry"
                                         value={uploadDescription}
                                         onChange={(e) => setUploadDescription(e.target.value)}
-                                        rows={3}
+                                        rows={2}
                                     />
                                 </div>
                             </>
                         )}
 
                         {/* Other folders - minimal fields */}
-                        {selectedFolder !== "service_images" && selectedFolder !== "Gallery_images" && selectedFolder !== "before_after_images" && (
+                        {selectedFolder !== "service" && selectedFolder !== "gallery" && selectedFolder !== "before-after" && (
                             <>
                                 <div className="space-y-2">
                                     <Label htmlFor="upload-title">Title</Label>
@@ -945,6 +1156,8 @@ const FileManager = () => {
                                 onClick={() => {
                                     setShowFolderDialog(false);
                                     setPendingFilesArray([]);
+                                    setPendingBeforeFile(null);
+                                    setPendingAfterFile(null);
                                     setUploadProgress([]);
                                 }}
                             >
@@ -952,14 +1165,18 @@ const FileManager = () => {
                             </Button>
                             <Button
                                 onClick={handleUploadConfirm}
-                                disabled={uploading || ((selectedFolder === "service_images" || selectedFolder === "Gallery_images" || selectedFolder === "before_after_images") && !uploadTitle.trim())}
+                                disabled={
+                                    uploading || 
+                                    ((selectedFolder === "service" || selectedFolder === "gallery") && !uploadTitle.trim()) ||
+                                    (selectedFolder === "before-after" && (!uploadTitle.trim() || !pendingBeforeFile || !pendingAfterFile))
+                                }
                             >
                                 {uploading ? (
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 ) : (
                                     <Upload className="w-4 h-4 mr-2" />
                                 )}
-                                Upload {pendingFilesArray.length} file(s)
+                                {selectedFolder === "before-after" ? "Upload Comparison" : `Upload ${pendingFilesArray.length} file(s)`}
                             </Button>
                         </div>
                     </div>

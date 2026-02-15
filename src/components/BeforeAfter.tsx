@@ -3,16 +3,24 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { type BeforeAfterItem, cloudinaryService } from "@/lib/cloudinaryService";
 import before from "@/assets/beforeAfter/before1.jpg";
-import after from "@/assets/beforeAfter/after1.jpg";
+import after from "@/assets/beforeAfter/After1.jpg";
 import before2 from "@/assets/beforeAfter/before2.jpg";
 import after2 from "@/assets/beforeAfter/after2.jpg";
 import before3 from "@/assets/beforeAfter/before3.jpeg";
 import after3 from "@/assets/beforeAfter/after3.jpeg";
 
+interface ProjectItem {
+  id: number;
+  before: string;
+  after: string;
+  thumbnail: string;
+  title?: string;
+  description?: string;
+}
 
-
-const projects = [
+const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 1,
     before: before,
@@ -61,7 +69,10 @@ export const BeforeAfter = () => {
     },
     [Autoplay({ delay: 3000, stopOnInteraction: true })]
   );
-  const [activeProject, setActiveProject] = useState(projects[0]);
+  
+  const [projects, setProjects] = useState<ProjectItem[]>(DEFAULT_PROJECTS);
+  const [activeProject, setActiveProject] = useState<ProjectItem>(DEFAULT_PROJECTS[0]);
+  const [loading, setLoading] = useState(true);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -117,24 +128,28 @@ export const BeforeAfter = () => {
   }, [activeProject]);
 
   useEffect(() => {
-    const fetchImages = async () => {
-      const { data: files, error } = await supabase
-        .storage
-        .from("services-images")
-        .list("beforeafter", {
-          limit: 100,
-          offset: 0,
-        });
-
-      if (error) {
-        console.error(error);
-        return;
+    const loadProjects = async () => {
+      try {
+        const data = await cloudinaryService.fetchBeforeAfter();
+        if (data && data.length > 0) {
+          const transformed = data.map(item => ({
+            id: item.id,
+            before: item.before_image_url,
+            after: item.after_image_url,
+            thumbnail: item.after_image_url,
+            title: item.title,
+            description: item.description
+          }));
+          setProjects(transformed);
+          setActiveProject(transformed[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch transformations:", error);
+      } finally {
+        setLoading(false);
       }
-
-      console.log(files);
     };
-
-    fetchImages();
+    loadProjects();
   }, []);
 
 
