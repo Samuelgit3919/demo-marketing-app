@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      cloudinary_files: {
+        Row: {
+          created_at: string
+          folder: string | null
+          id: string
+          public_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          folder?: string | null
+          id?: string
+          public_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          folder?: string | null
+          id?: string
+          public_id?: string
+          url?: string
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           additional_notes: string | null
@@ -89,36 +113,6 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
-        }
-        Relationships: []
-      }
-      transformation_projects: {
-        Row: {
-          after_image_url: string
-          before_image_url: string
-          created_at: string
-          display_order: number
-          id: string
-          thumbnail_url: string
-          title: string | null
-        }
-        Insert: {
-          after_image_url: string
-          before_image_url: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          thumbnail_url: string
-          title?: string | null
-        }
-        Update: {
-          after_image_url?: string
-          before_image_url?: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          thumbnail_url?: string
-          title?: string | null
         }
         Relationships: []
       }

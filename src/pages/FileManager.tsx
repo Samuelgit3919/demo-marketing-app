@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { cloudinaryService, CLOUDINARY_FOLDERS } from "@/lib/cloudinaryService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,20 +38,14 @@ interface CloudinaryFile {
     id: string;
     url: string;
     public_id: string;
-    format: string | null;
-    resource_type: string | null;
-    bytes: number;
-    width: number | null;
-    height: number | null;
-    original_name: string | null;
     folder: string | null;
     created_at: string;
 }
 
 const FOLDER_OPTIONS = [
-    { value: "service_images", label: "Service Images" },
-    { value: "Gallery_images", label: "Gallery Images" },
-    { value: "before_after_images", label: "Before & After Images" },
+    { value: CLOUDINARY_FOLDERS.SERVICES, label: "Service Images" },
+    { value: CLOUDINARY_FOLDERS.GALLERY, label: "Gallery Images" },
+    { value: CLOUDINARY_FOLDERS.BEFORE_AFTER, label: "Before & After Images" },
 ];
 
 const FileManager = () => {
@@ -68,31 +63,7 @@ const FileManager = () => {
     const [showFolderDialog, setShowFolderDialog] = useState(false);
     const [pendingFilesArray, setPendingFilesArray] = useState<File[]>([]);
 
-    useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (event, session) => {
-                setSession(session);
-                if (!session) {
-                    setTimeout(() => navigate("/auth"), 0);
-                } else {
-                    setTimeout(() => checkAdminRole(session.user.id), 0);
-                }
-            }
-        );
-
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            if (!session) {
-                navigate("/auth");
-            } else {
-                checkAdminRole(session.user.id);
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, [navigate]);
-
-    const checkAdminRole = async (userId: string) => {
+    const checkAdminRole = useCallback(async (userId: string) => {
         try {
             const { data, error } = await supabase
                 .from("user_roles")
@@ -118,18 +89,39 @@ const FileManager = () => {
         } finally {
             setCheckingAuth(false);
         }
-    };
+    }, [navigate]);
+
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                setSession(session);
+                if (!session) {
+                    setTimeout(() => navigate("/auth"), 0);
+                } else {
+                    setTimeout(() => checkAdminRole(session.user.id), 0);
+                }
+            }
+        );
+
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            if (!session) {
+                navigate("/auth");
+            } else {
+                checkAdminRole(session.user.id);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [navigate, checkAdminRole]);
 
     const fetchFiles = useCallback(async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from("cloudinary_files")
-                .select("*")
-                .order("created_at", { ascending: false });
-
-            if (error) throw error;
-            setFiles((data as CloudinaryFile[]) || []);
+            console.debug("Fetching all files via cloudinaryService");
+            const allFiles = await cloudinaryService.fetchAllFiles();
+            console.debug(`Fetched ${allFiles.length} files from database`);
+            setFiles(allFiles);
         } catch (error) {
             console.error("Error fetching files:", error);
             toast.error("Failed to load files");
@@ -159,38 +151,15 @@ const FileManager = () => {
         setUploading(true);
         try {
             for (const file of pendingFilesArray) {
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("folder", `admin-uploads/${selectedFolder}`);
-
-                const { data, error } = await supabase.functions.invoke("cloudinary-upload", {
-                    body: formData,
-                });
-
-                if (error) throw error;
-                if (data?.error) throw new Error(data.error);
-
-                const { error: dbError } = await supabase.from("cloudinary_files").insert({
-                    url: data.url,
-                    public_id: data.public_id,
-                    format: data.format,
-                    resource_type: data.resource_type,
-                    bytes: data.bytes,
-                    width: data.width,
-                    height: data.height,
-                    original_name: file.name,
-                    uploaded_by: session?.user?.id,
-                    folder: selectedFolder,
-                });
-
-                if (dbError) throw dbError;
+                await cloudinaryService.uploadImage(file, selectedFolder);
             }
 
             toast.success(`${pendingFilesArray.length} file(s) uploaded to ${FOLDER_OPTIONS.find(f => f.value === selectedFolder)?.label}`);
             fetchFiles();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Upload error:", error);
-            toast.error(error?.message || "Failed to upload file(s)");
+            const message = error instanceof Error ? error.message : "Failed to upload file(s)";
+            toast.error(message);
         } finally {
             setUploading(false);
             setPendingFilesArray([]);
@@ -198,20 +167,29 @@ const FileManager = () => {
     };
 
     const handleDelete = async (file: CloudinaryFile) => {
-        if (!confirm(`Delete "${file.original_name || file.public_id}"?`)) return;
+        if (!confirm(`Delete "${file.public_id}"?`)) return;
+
+        // Ensure we still have a session before calling the protected function
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (!currentSession) {
+            toast.error("Session expired — please sign in again.");
+            setTimeout(() => navigate("/auth"), 700);
+            return;
+        }
 
         try {
-            const { error } = await supabase
-                .from("cloudinary_files")
-                .delete()
-                .eq("id", file.id);
-
-            if (error) throw error;
-            toast.success("File record deleted");
+            await cloudinaryService.deleteImage(file.public_id);
+            toast.success("File deleted successfully");
             fetchFiles();
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Delete error:", error);
-            toast.error("Failed to delete file");
+            const message = error instanceof Error ? error.message : String(error);
+            if (message.includes("Unauthorized")) {
+                toast.error("Unauthorized — please sign in again.");
+                setTimeout(() => navigate("/auth"), 700);
+                return;
+            }
+            toast.error(message || "Failed to delete file");
         }
     };
 
@@ -222,22 +200,16 @@ const FileManager = () => {
 
     const handlePreview = (file: CloudinaryFile) => {
         setPreviewUrl(file.url);
-        setPreviewType(file.resource_type || "");
-        setPreviewName(file.original_name || file.public_id);
+        setPreviewType("image"); // Assume image for now
+        setPreviewName(file.public_id);
     };
 
-    const getFileIcon = (resourceType: string | null) => {
-        if (resourceType === "image") return <ImageIcon className="w-5 h-5 text-blue-500" />;
-        if (resourceType === "video") return <VideoIcon className="w-5 h-5 text-purple-500" />;
-        return <FileIcon className="w-5 h-5 text-muted-foreground" />;
+    const getFileIcon = (file: CloudinaryFile) => {
+        // Since we don't have resource_type, use a generic icon
+        return <ImageIcon className="w-5 h-5 text-blue-500" />;
     };
 
-    const formatSize = (bytes: number) => {
-        if (!bytes) return "—";
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    };
+
 
     if (checkingAuth || !session) {
         return (
@@ -321,33 +293,28 @@ const FileManager = () => {
                             {files.map((file) => (
                                 <Card key={file.id} className="p-4 flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        {getFileIcon(file.resource_type)}
+                                        {getFileIcon(file)}
                                         <div className="min-w-0">
                                             <p className="text-sm font-medium truncate">
-                                                {file.original_name || file.public_id}
+                                                {file.public_id}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {formatSize(file.bytes)} •{" "}
-                                                {file.format?.toUpperCase()} •{" "}
                                                 {file.folder && <span className="text-primary">{FOLDER_OPTIONS.find(f => f.value === file.folder)?.label || file.folder}</span>}
                                                 {file.folder && " • "}
-                                                {file.width && file.height ? `${file.width}×${file.height} • ` : ""}
                                                 {new Date(file.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-1 shrink-0">
-                                        {(file.resource_type === "image" || file.resource_type === "video") && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handlePreview(file)}
-                                                title="Preview"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </Button>
-                                        )}
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handlePreview(file)}
+                                            title="Preview"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                        </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -388,11 +355,8 @@ const FileManager = () => {
                         <DialogTitle>{previewName}</DialogTitle>
                     </DialogHeader>
                     <div className="flex items-center justify-center max-h-[70vh] overflow-auto">
-                        {previewType === "image" && previewUrl && (
+                        {previewUrl && (
                             <img src={previewUrl} alt={previewName} className="max-w-full max-h-[65vh] rounded" />
-                        )}
-                        {previewType === "video" && previewUrl && (
-                            <video src={previewUrl} controls className="max-w-full max-h-[65vh] rounded" />
                         )}
                     </div>
                 </DialogContent>

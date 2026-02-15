@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import closetImage from "@/assets/cloth_desig2.jpg";
 import kitchenImage from "@/assets/kitchen-design.jpg";
@@ -6,6 +6,7 @@ import garageImage from "@/assets/garage-design.jpg";
 import kitchenCabinetImage from "@/assets/cabinetry1.jpg";
 import BedDesign from "@/assets/bed_design.jpg";
 import ShoesDesign from "@/assets/shoes-design.jpg";
+import { CloudinaryImage, cloudinaryService } from "@/lib/cloudinaryService";
 
 const services = [
   {
@@ -49,6 +50,26 @@ const services = [
 export const Services = () => {
   const [selectedService, setSelectedService] = useState(0);
   const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
+
+  const [images, setImages] = useState<CloudinaryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<CloudinaryImage | null>(null);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const data = await cloudinaryService.fetchImages(CLOUDINARY_FOLDERS.Gallery_images);
+        setImages(data);
+      } catch (error) {
+        console.error("Failed to fetch gallery images:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchImages();
+  }, []);
+  console.log("service images:", images);
+
 
   return (
     <section
