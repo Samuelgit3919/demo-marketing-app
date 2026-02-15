@@ -22,8 +22,11 @@ serve(async (req: Request) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    console.log(supabaseUrl);
+    // const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    console.log(supabaseKey);
 
     if (!supabaseUrl || !supabaseKey) {
       return new Response(
