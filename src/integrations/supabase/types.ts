@@ -10,31 +10,118 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
-      cloudinary_files: {
+      before_after: {
+        Row: {
+          after_image_url: string
+          after_public_id: string
+          before_image_url: string
+          before_public_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          order_index: number | null
+          title: string
+          type: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at: string
+        }
+        Insert: {
+          after_image_url: string
+          after_public_id: string
+          before_image_url: string
+          before_public_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number | null
+          title: string
+          type: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at?: string
+        }
+        Update: {
+          after_image_url?: string
+          after_public_id?: string
+          before_image_url?: string
+          before_public_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number | null
+          title?: string
+          type?: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gallery: {
         Row: {
           created_at: string
-          folder: string | null
+          description: string | null
           id: string
+          image_url: string
           public_id: string
-          url: string
+          title: string
+          type: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          folder?: string | null
+          description?: string | null
           id?: string
+          image_url: string
           public_id: string
-          url: string
+          title: string
+          type: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          folder?: string | null
+          description?: string | null
           id?: string
+          image_url?: string
           public_id?: string
-          url?: string
+          title?: string
+          type?: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          public_id: string
+          title: string
+          type: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          public_id: string
+          title: string
+          type: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          public_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["gallery_item_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -45,6 +132,7 @@ export type Database = {
           calendly_event_url: string | null
           created_at: string
           email: string
+          file_paths: string[] | null
           full_name: string
           id: string
           meeting_date: string | null
@@ -63,6 +151,7 @@ export type Database = {
           calendly_event_url?: string | null
           created_at?: string
           email: string
+          file_paths?: string[] | null
           full_name: string
           id?: string
           meeting_date?: string | null
@@ -81,6 +170,7 @@ export type Database = {
           calendly_event_url?: string | null
           created_at?: string
           email?: string
+          file_paths?: string[] | null
           full_name?: string
           id?: string
           meeting_date?: string | null
@@ -131,6 +221,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      gallery_item_type:
+        | "image"
+        | "video"
+        | "closet"
+        | "kitchen"
+        | "garage"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -259,6 +356,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      gallery_item_type: [
+        "image",
+        "video",
+        "closet",
+        "kitchen",
+        "garage",
+        "other",
+      ],
     },
   },
 } as const

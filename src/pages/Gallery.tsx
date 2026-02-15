@@ -1,89 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { Footer } from "@/components/Footer";
+import { cloudinaryService } from "@/lib/cloudinaryService";
+import { type GalleryItem } from "@/types/cloudinary";
+import { Loader2 } from "lucide-react";
 
 type RoomType = "all" | "closet" | "kitchen" | "garage";
 
-interface Project {
-  id: number;
-  title: string;
-  type: RoomType;
-  image: string;
-  description: string;
-}
-
-const projects: Project[] = [
-  {
-    id: 1,
-    title: "Modern Walk-In Closet",
-    type: "closet",
-    image: "https://i.pinimg.com/736x/7c/4b/20/7c4b2024860c5b62c1dfd85157c74351.jpg",
-    description: "Custom organized closet with LED lighting and premium finishes"
-  },
-  {
-    id: 2,
-    title: "Luxury Master Closet",
-    type: "closet",
-    image: "https://i.pinimg.com/1200x/01/2e/11/012e114ce36e37e8b30936f068a64f43.jpg",
-    description: "Elegant closet design with island and chandelier"
-  },
-  {
-    id: 3,
-    title: "Contemporary Closet System",
-    type: "closet",
-    image: "https://i.pinimg.com/736x/ce/85/21/ce852105f77bb7d802853d4a77b77cb1.jpg",
-    description: "Sleek and functional closet organization system"
-  },
-  {
-    id: 4,
-    title: "Modern Kitchen Renovation",
-    type: "kitchen",
-    image: "https://i.pinimg.com/736x/8d/9b/91/8d9b91e04629c08002e307232baaef7c.jpg",
-    description: "Complete kitchen transformation with custom cabinetry"
-  },
-  {
-    id: 5,
-    title: "Gourmet Kitchen Design",
-    type: "kitchen",
-    image: "https://i.pinimg.com/1200x/9f/2b/ba/9f2bba36bc0e61a6ccc8c0d83a8bcef7.jpg",
-    description: "High-end kitchen with premium appliances and finishes"
-  },
-  {
-    id: 6,
-    title: "Contemporary Kitchen",
-    type: "kitchen",
-    image: "https://i.pinimg.com/736x/46/03/35/460335456cfb1f6910a8e933110fa8c4.jpg",
-    description: "Minimalist kitchen design with smart storage solutions"
-  },
-  {
-    id: 7,
-    title: "Organized Garage System",
-    type: "garage",
-    image: "https://i.pinimg.com/1200x/77/3e/bf/773ebfe517df884b2935e7fb338b333c.jpg",
-    description: "Complete garage organization with custom storage"
-  },
-  {
-    id: 8,
-    title: "Workshop Garage Design",
-    type: "garage",
-    image: "https://i.pinimg.com/1200x/98/26/30/9826306fbc906e33a249cc4944ba9759.jpg",
-    description: "Functional garage workspace with tool organization"
-  },
-  {
-    id: 9,
-    title: "Premium Garage Storage",
-    type: "garage",
-    image: "https://i.pinimg.com/1200x/81/b6/b1/81b6b130e736a41c9b7f638c0b718766.jpg",
-    description: "High-end garage storage solutions and flooring"
-  }
-];
-
 const Gallery = () => {
   const [selectedFilter, setSelectedFilter] = useState<RoomType>("all");
+  const [projects, setProjects] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const { elementRef: headerRef, isVisible: headerVisible } = useIntersectionObserver();
   const { elementRef: filterRef, isVisible: filterVisible } = useIntersectionObserver();
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await cloudinaryService.fetchGallery();
+        setProjects(data);
+      } catch (error) {
+        console.error("Error fetching gallery projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const filteredProjects = selectedFilter === "all"
     ? projects
@@ -168,16 +114,25 @@ const Gallery = () => {
       {/* Gallery Grid */}
       <section id="gallery-grid" className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map((project, index) => (
-              <ProjectCard key={project.id} project={project} index={index} />
-            ))}
-          </div>
-
-          {filteredProjects.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-2xl text-muted-foreground">No projects found in this category.</p>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              <p className="text-xl text-muted-foreground animate-pulse">Loading gallery items...</p>
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProjects.map((project, index) => (
+                  <ProjectCard key={project.id} project={project} index={index} />
+                ))}
+              </div>
+
+              {filteredProjects.length === 0 && (
+                <div className="text-center py-20">
+                  <p className="text-2xl text-muted-foreground">No projects found in this category.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -187,7 +142,7 @@ const Gallery = () => {
   );
 };
 
-const ProjectCard = ({ project, index }: { project: Project; index: number }) => {
+const ProjectCard = ({ project, index }: { project: GalleryItem; index: number }) => {
   const { elementRef, isVisible } = useIntersectionObserver();
 
   return (
@@ -201,7 +156,7 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
     >
       <div className="aspect-[4/3] overflow-hidden">
         <img
-          src={project.image}
+          src={project.image_url}
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />

@@ -6,9 +6,9 @@ import garageImage from "@/assets/garage-design.jpg";
 import kitchenCabinetImage from "@/assets/cabinetry1.jpg";
 import BedDesign from "@/assets/bed_design.jpg";
 import ShoesDesign from "@/assets/shoes-design.jpg";
-import { CloudinaryImage, cloudinaryService } from "@/lib/cloudinaryService";
+import { type ServiceItem, cloudinaryService } from "@/lib/cloudinaryService";
 
-const services = [
+const DEFAULT_SERVICES = [
   {
     title: "Custom Closets",
     description: "Walk-in closets, reach-in closets, and wardrobe systems designed to maximize space and style.",
@@ -51,24 +51,30 @@ export const Services = () => {
   const [selectedService, setSelectedService] = useState(0);
   const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
 
-  const [images, setImages] = useState<CloudinaryImage[]>([]);
+  const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<CloudinaryImage | null>(null);
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const loadServices = async () => {
       try {
-        const data = await cloudinaryService.fetchImages(CLOUDINARY_FOLDERS.Gallery_images);
-        setImages(data);
+        const data = await cloudinaryService.fetchServices();
+        if (data && data.length > 0) {
+          // Transform if necessary, or just use as is if schema matches
+          setServices(data.map(item => ({
+            title: item.title,
+            description: item.description || "",
+            image: item.image_url,
+            features: ["Professional Design", "Custom Solution", "Quality Materials"] // Fallback features
+          })));
+        }
       } catch (error) {
-        console.error("Failed to fetch gallery images:", error);
+        console.error("Failed to fetch services:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchImages();
+    loadServices();
   }, []);
-  console.log("service images:", images);
 
 
   return (
