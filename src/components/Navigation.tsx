@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, CreditCard } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +45,16 @@ export const Navigation = () => {
             >
               About Us
             </NavLink>
+            <a
+              href="https://mtl-closets.myhelcim.com/hosted/?token=9f9e5d22c6d13444ef33d9"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm" className="gap-2 border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700">
+                <CreditCard className="w-4 h-4" />
+                Pay Here
+              </Button>
+            </a>
             <NavLink to="/wizard">
               <Button variant="accent" size="sm">
                 Get Started

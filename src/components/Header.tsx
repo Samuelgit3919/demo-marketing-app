@@ -26,15 +26,7 @@ export const Header = () => {
               <Home className="w-4 h-4" />
               <span className="hidden sm:inline">Home</span>
             </Button>
-            {/* <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin")}
-              className="gap-2"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              <span className="hidden sm:inline">Admin</span>
-            </Button> */}
+
           </nav>
         </div>
       </div>
