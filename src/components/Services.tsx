@@ -65,6 +65,7 @@ export const Services = () => {
     const loadServices = async () => {
       try {
         const data = await cloudinaryService.fetchServices();
+        console.log(data);
         if (data && data.length > 0) {
           // Transform if necessary, or just use as is if schema matches
           const transformed: ServiceViewModel[] = data.map(item => ({
@@ -73,6 +74,7 @@ export const Services = () => {
             image: item.image_url,
             features: ["Professional Design", "Custom Solution", "Quality Materials"] // Fallback features
           }));
+
           setServices(transformed);
         }
       } catch (error) {
