@@ -30,7 +30,7 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        
+
         // Redirect authenticated users to admin
         if (session?.user) {
           setTimeout(() => {
@@ -53,7 +53,7 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!loginEmail || !loginPassword) {
       toast.error("Please fill in all fields");
       return;
@@ -86,7 +86,7 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!signupEmail || !signupPassword || !confirmPassword) {
       toast.error("Please fill in all fields");
       return;
@@ -105,7 +105,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/admin`;
-      
+
       const { error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
