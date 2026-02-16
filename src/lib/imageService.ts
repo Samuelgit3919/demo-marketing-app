@@ -1,50 +1,41 @@
 import { supabase } from "@/integrations/supabase/client";
+import { storageService } from "./storageService";
 import { 
-  type CloudinaryAsset, 
+  type ImageAsset, 
   type GalleryItem, 
   type SupabaseFile, 
   type ServiceItem, 
   type BeforeAfterItem 
-} from "@/types/cloudinary";
+} from "@/types/image";
 
-export type { ServiceItem, BeforeAfterItem, SupabaseFile, GalleryItem, CloudinaryAsset };
+export type { ServiceItem, BeforeAfterItem, SupabaseFile, GalleryItem, ImageAsset };
 
-export const CLOUDINARY_FOLDERS = {
+export const IMAGE_BUCKET = "images";
+
+export const IMAGE_FOLDERS = {
   GALLERY: "gallery",
   BEFORE_AFTER: "before-after",
-  SERVICES: "service",
-  TEAM: "team_members",
-  BLOG: "blog_posts"
+  SERVICES: "service"
 } as const;
 
-export const cloudinaryService = {
+export const imageService = {
 
-  async uploadImage(file: File, folder: string, options?: { originalName?: string; uploadedBy?: string }, retries = 3): Promise<void> {
+  async uploadImage(file: File, folder: string, options?: { originalName?: string; uploadedBy?: string }, retries = 3): Promise<{ url: string; path: string }> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("folder", folder);
-        if (options?.originalName) formData.append("original_name", options.originalName);
-        if (options?.uploadedBy) formData.append("uploaded_by", options.uploadedBy);
+        const timestamp = Date.now();
+        const fileName = `${timestamp}-${file.name.replace(/\s+/g, '_')}`;
+        const path = `${folder}/${fileName}`;
 
-        const { error: uploadError } = await supabase.functions.invoke('cloudinary-upload', {
-          body: formData
-        });
-
-        if (uploadError) {
-          console.error("Upload function error details:", uploadError);
-          throw new Error(`Upload function failed: ${uploadError.message || JSON.stringify(uploadError)}`);
-        }
-
-        return;
+        const data = await storageService.uploadFile(file, IMAGE_BUCKET, path);
+        return data;
       } catch (error) {
         console.error(`Upload image attempt ${attempt} failed:`, error);
         if (attempt === retries) throw error;
-        // Wait before retry
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
+    throw new Error("Upload failed after retries");
   },
 
   async fetchGallery(retries = 3): Promise<GalleryItem[]> {
@@ -56,11 +47,11 @@ export const cloudinaryService = {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        return (data as GalleryItem[]) || [];
+        return data || [];
       } catch (error) {
         console.error(`Fetch gallery attempt ${attempt} failed:`, error);
         if (attempt === retries) throw error;
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
     return [];
@@ -75,11 +66,11 @@ export const cloudinaryService = {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        return (data as ServiceItem[]) || [];
+        return data || [];
       } catch (error) {
         console.error(`Fetch services attempt ${attempt} failed:`, error);
         if (attempt === retries) throw error;
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
     return [];
@@ -94,11 +85,11 @@ export const cloudinaryService = {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        return (data as BeforeAfterItem[]) || [];
+        return data || [];
       } catch (error) {
         console.error(`Fetch before_after attempt ${attempt} failed:`, error);
         if (attempt === retries) throw error;
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
     return [];
@@ -110,15 +101,18 @@ export const cloudinaryService = {
     data: { title: string; description?: string; type: string },
     retries = 3
   ): Promise<void> {
-    let beforePublicId: string | null = null;
-    let afterPublicId: string | null = null;
+    const timestamp = Date.now();
+    const beforeFileName = `before-${timestamp}-${beforeFile.name.replace(/\s+/g, '_')}`;
+    const afterFileName = `after-${timestamp}-${afterFile.name.replace(/\s+/g, '_')}`;
+    const beforePath = `${IMAGE_FOLDERS.BEFORE_AFTER}/${beforeFileName}`;
+    const afterPath = `${IMAGE_FOLDERS.BEFORE_AFTER}/${afterFileName}`;
 
-    const cleanupUploads = async (publicIds: string[]) => {
-      for (const publicId of publicIds) {
+    const cleanupUploads = async (paths: string[]) => {
+      for (const path of paths) {
         try {
-          await supabase.functions.invoke("cloudinary-delete", { body: { publicId } });
+          await storageService.deleteFile(IMAGE_BUCKET, path);
         } catch (cleanupError) {
-          console.warn(`Failed to cleanup Cloudinary asset ${publicId}:`, cleanupError);
+          console.warn(`Failed to cleanup storage asset ${path}:`, cleanupError);
         }
       }
     };
@@ -126,32 +120,19 @@ export const cloudinaryService = {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         // 1. Upload Before image
-        const beforeFormData = new FormData();
-        beforeFormData.append("file", beforeFile);
-        beforeFormData.append("folder", CLOUDINARY_FOLDERS.BEFORE_AFTER);
-        
-        const { data: beforeRes, error: beforeErr } = await supabase.functions.invoke('cloudinary-upload', {
-          body: beforeFormData
-        });
-        if (beforeErr) throw beforeErr;
-
-        beforePublicId = (beforeRes as any).public_id;
+        const { url: beforeUrl, path: uploadedBeforePath } = await storageService.uploadFile(beforeFile, IMAGE_BUCKET, beforePath);
 
         // 2. Upload After image
-        const afterFormData = new FormData();
-        afterFormData.append("file", afterFile);
-        afterFormData.append("folder", CLOUDINARY_FOLDERS.BEFORE_AFTER);
-        
-        const { data: afterRes, error: afterErr } = await supabase.functions.invoke('cloudinary-upload', {
-          body: afterFormData
-        });
-        if (afterErr) {
-          // Cleanup before image if after upload fails
-          if (beforePublicId) await cleanupUploads([beforePublicId]);
+        let afterUrl: string;
+        let uploadedAfterPath: string;
+        try {
+          const res = await storageService.uploadFile(afterFile, IMAGE_BUCKET, afterPath);
+          afterUrl = res.url;
+          uploadedAfterPath = res.path;
+        } catch (afterErr) {
+          if (uploadedBeforePath) await cleanupUploads([uploadedBeforePath]);
           throw afterErr;
         }
-
-        afterPublicId = (afterRes as any).public_id;
 
         // 3. Create DB record
         const { error: dbError } = await supabase
@@ -160,16 +141,15 @@ export const cloudinaryService = {
             title: data.title,
             description: data.description || null,
             type: data.type as any,
-            before_image_url: (beforeRes as any).url,
-            before_public_id: beforePublicId,
-            after_image_url: (afterRes as any).url,
-            after_public_id: afterPublicId,
+            before_image_url: beforeUrl,
+            before_public_id: uploadedBeforePath,
+            after_image_url: afterUrl,
+            after_public_id: uploadedAfterPath,
             is_active: true
           });
 
         if (dbError) {
-          // Cleanup both images if DB insert fails
-          await cleanupUploads([beforePublicId, afterPublicId].filter(Boolean) as string[]);
+          await cleanupUploads([uploadedBeforePath, uploadedAfterPath]);
           throw dbError;
         }
 
@@ -184,12 +164,9 @@ export const cloudinaryService = {
 
   async deleteItem(id: string, table: string, publicIds: string[]): Promise<void> {
     try {
-      // 1. Delete from Cloudinary (loop through all related public IDs)
-      for (const publicId of publicIds) {
-        const { error: funcError } = await supabase.functions.invoke("cloudinary-delete", { body: { publicId } });
-        if (funcError) {
-          console.warn(`Cloudinary delete warning for ${publicId}:`, funcError);
-        }
+      // 1. Delete from Supabase Storage (loop through all related paths)
+      for (const path of publicIds) {
+        await storageService.deleteFile(IMAGE_BUCKET, path);
       }
 
       // 2. Delete from Supabase table
@@ -208,14 +185,8 @@ export const cloudinaryService = {
 
   async deleteImage(publicId: string, table: "gallery" | "services" | "before_after"): Promise<void> {
     try {
-      // First delete from Cloudinary
-      const res = await supabase.functions.invoke("cloudinary-delete", { body: { publicId } });
-
-      if ((res as any).error) {
-        const funcErr = (res as any).error;
-        console.error("Delete function returned error payload:", funcErr);
-        throw new Error(funcErr.message || JSON.stringify(funcErr));
-      }
+      // First delete from Supabase Storage
+      await storageService.deleteFile(IMAGE_BUCKET, publicId);
 
       // Then delete from the corresponding Supabase table
       const { error } = await supabase

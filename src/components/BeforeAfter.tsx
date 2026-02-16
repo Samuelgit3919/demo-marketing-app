@@ -3,7 +3,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { type BeforeAfterItem, cloudinaryService } from "@/lib/cloudinaryService";
+import { type BeforeAfterItem, imageService } from "@/lib/imageService";
 import before from "@/assets/beforeAfter/before1.jpg";
 import after from "@/assets/beforeAfter/After1.jpg";
 import before2 from "@/assets/beforeAfter/before2.jpg";
@@ -12,7 +12,7 @@ import before3 from "@/assets/beforeAfter/before3.jpeg";
 import after3 from "@/assets/beforeAfter/after3.jpeg";
 
 interface ProjectItem {
-  id: number;
+  id: string | number;
   before: string;
   after: string;
   thumbnail: string;
@@ -130,7 +130,7 @@ export const BeforeAfter = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        const data = await cloudinaryService.fetchBeforeAfter();
+        const data = await imageService.fetchBeforeAfter();
         if (data && data.length > 0) {
           const transformed = data.map(item => ({
             id: item.id,

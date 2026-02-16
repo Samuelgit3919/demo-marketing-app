@@ -6,7 +6,7 @@ import garageImage from "@/assets/garage-design.jpg";
 import kitchenCabinetImage from "@/assets/cabinetry1.jpg";
 import BedDesign from "@/assets/bed_design.jpg";
 import ShoesDesign from "@/assets/shoes-design.jpg";
-import { type ServiceItem, cloudinaryService } from "@/lib/cloudinaryService";
+import { type ServiceItem, imageService } from "@/lib/imageService";
 
 interface ServiceViewModel {
   title: string;
@@ -18,39 +18,75 @@ interface ServiceViewModel {
 const DEFAULT_SERVICES: ServiceViewModel[] = [
   {
     title: "Custom Closets",
-    description: "Walk-in closets, reach-in closets, and wardrobe systems designed to maximize space and style.",
+    description:
+      "Walk-in closets, reach-in closets, and wardrobe systems designed to maximize space and style.",
     image: closetImage,
-    features: ["Custom Shelving", "Drawer Systems", "Lighting Design", "Luxury Finishes"],
+    features: [
+      "Custom Shelving",
+      "Drawer Systems",
+      "Lighting Design",
+      "Luxury Finishes",
+    ],
   },
   {
     title: "Kitchen Design",
-    description: "Beautiful kitchen organization with custom cabinetry and storage solutions that blend form and function.",
+    description:
+      "Beautiful kitchen organization with custom cabinetry and storage solutions that blend form and function.",
     image: kitchenImage,
-    features: ["Cabinet Design", "Pantry Organization", "Island Storage", "Smart Solutions"],
+    features: [
+      "Cabinet Design",
+      "Pantry Organization",
+      "Island Storage",
+      "Smart Solutions",
+    ],
   },
   {
     title: "Garage Systems",
-    description: "Transform your garage into an organized workspace with professional storage systems and workbenches.",
+    description:
+      "Transform your garage into an organized workspace with professional storage systems and workbenches.",
     image: garageImage,
-    features: ["Wall Systems", "Overhead Storage", "Workbenches", "Tool Organization"],
+    features: [
+      "Wall Systems",
+      "Overhead Storage",
+      "Workbenches",
+      "Tool Organization",
+    ],
   },
   {
     title: "Kitchen Cabinets",
-    description: "High-quality, custom kitchen cabinets tailored to your style and storage needs.",
+    description:
+      "High-quality, custom kitchen cabinets tailored to your style and storage needs.",
     image: kitchenCabinetImage,
-    features: ["Custom Sizes", "Premium Materials", "Soft-Close Drawers", "Modern & Classic Styles"],
+    features: [
+      "Custom Sizes",
+      "Premium Materials",
+      "Soft-Close Drawers",
+      "Modern & Classic Styles",
+    ],
   },
   {
     title: "Bedroom Storage",
-    description: "Maximize bedroom space with custom wardrobes, under-bed storage, and shelving solutions.",
+    description:
+      "Maximize bedroom space with custom wardrobes, under-bed storage, and shelving solutions.",
     image: BedDesign,
-    features: ["Built-in Wardrobes", "Under-Bed Drawers", "Floating Shelves", "Closet Organizers"],
+    features: [
+      "Built-in Wardrobes",
+      "Under-Bed Drawers",
+      "Floating Shelves",
+      "Closet Organizers",
+    ],
   },
   {
     title: "Shoe Storage",
-    description: "Keep your footwear organized and accessible with custom shoe racks and display solutions.",
+    description:
+      "Keep your footwear organized and accessible with custom shoe racks and display solutions.",
     image: ShoesDesign,
-    features: ["Shoe Racks", "Display Shelves", "Pull-out Drawers", "Adjustable Shelving"],
+    features: [
+      "Shoe Racks",
+      "Display Shelves",
+      "Pull-out Drawers",
+      "Adjustable Shelving",
+    ],
   },
 ];
 
@@ -58,21 +94,25 @@ export const Services = () => {
   const [selectedService, setSelectedService] = useState(0);
   const { elementRef, isVisible } = useIntersectionObserver({ threshold: 0.2 });
 
-  const [services, setServices] = useState<ServiceViewModel[]>(DEFAULT_SERVICES);
+  const [services, setServices] =
+    useState<ServiceViewModel[]>(DEFAULT_SERVICES);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadServices = async () => {
       try {
-        const data = await cloudinaryService.fetchServices();
-        console.log(data);
+        const data = await imageService.fetchServices();
         if (data && data.length > 0) {
           // Transform if necessary, or just use as is if schema matches
-          const transformed: ServiceViewModel[] = data.map(item => ({
+          const transformed: ServiceViewModel[] = data.map((item) => ({
             title: item.title,
             description: item.description || "",
             image: item.image_url,
-            features: ["Professional Design", "Custom Solution", "Quality Materials"] // Fallback features
+            features: [
+              "Professional Design",
+              "Custom Solution",
+              "Quality Materials",
+            ], // Fallback features
           }));
 
           setServices(transformed);
@@ -91,12 +131,16 @@ export const Services = () => {
     <section
       id="services"
       ref={elementRef as React.RefObject<HTMLElement>}
-      className={`py-24 bg-background transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+      className={`py-24 bg-background transition-all duration-1000 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`text-center mb-16 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}>
+        <div
+          className={`text-center mb-16 transition-all duration-700 delay-200 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Our <span className="text-accent">Services</span>
           </h2>
@@ -125,7 +169,10 @@ export const Services = () => {
                   </p>
                   <ul className="grid grid-cols-2 sm:grid-cols-1 gap-1.5 sm:gap-2">
                     {services[selectedService].features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-white/90 text-xs sm:text-sm md:text-base">
+                      <li
+                        key={idx}
+                        className="flex items-center gap-2 text-white/90 text-xs sm:text-sm md:text-base"
+                      >
                         <div className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0"></div>
                         <span className="truncate">{feature}</span>
                       </li>
@@ -141,10 +188,11 @@ export const Services = () => {
                 <div
                   key={index}
                   onClick={() => setSelectedService(index)}
-                  className={`relative h-[188px] overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${selectedService === index
-                    ? 'ring-4 ring-accent shadow-large scale-105'
-                    : 'hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100'
-                    }`}
+                  className={`relative h-[188px] overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${
+                    selectedService === index
+                      ? "ring-4 ring-accent shadow-large scale-105"
+                      : "hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100"
+                  }`}
                 >
                   <img
                     src={service.image}
@@ -167,10 +215,11 @@ export const Services = () => {
                 <div
                   key={index}
                   onClick={() => setSelectedService(index)}
-                  className={`relative flex-shrink-0 w-32 sm:w-40 h-32 sm:h-40 overflow-hidden rounded-lg cursor-pointer transition-all duration-300 snap-start ${selectedService === index
-                    ? 'ring-3 ring-accent shadow-large scale-105'
-                    : 'opacity-70 hover:opacity-100 active:scale-95'
-                    }`}
+                  className={`relative flex-shrink-0 w-32 sm:w-40 h-32 sm:h-40 overflow-hidden rounded-lg cursor-pointer transition-all duration-300 snap-start ${
+                    selectedService === index
+                      ? "ring-3 ring-accent shadow-large scale-105"
+                      : "opacity-70 hover:opacity-100 active:scale-95"
+                  }`}
                 >
                   <img
                     src={service.image}
@@ -193,10 +242,11 @@ export const Services = () => {
                 <div
                   key={index + 3}
                   onClick={() => setSelectedService(index + 3)}
-                  className={`relative h-56 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${selectedService === index + 3
-                    ? 'ring-4 ring-accent shadow-large scale-105'
-                    : 'hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100'
-                    }`}
+                  className={`relative h-56 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${
+                    selectedService === index + 3
+                      ? "ring-4 ring-accent shadow-large scale-105"
+                      : "hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100"
+                  }`}
                 >
                   <img
                     src={service.image}
