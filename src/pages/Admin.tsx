@@ -285,7 +285,7 @@ const Admin = () => {
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
               </Button>
-              <Button onClick={handleLogout} variant="outline">
+              <Button onClick={() => handleLogout()} variant="outline">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
