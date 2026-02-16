@@ -1,5 +1,6 @@
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import closetCover from "@/assets/hero-closet.jpg";
 import { useState } from "react";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
@@ -29,7 +30,7 @@ export const VideoSection = () => {
             {!isPlaying && (
               <>
                 <img
-                  src="/videos/closet-cover.jpg"
+                  src={closetCover}
                   alt="Video cover"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
