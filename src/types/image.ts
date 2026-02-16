@@ -1,9 +1,9 @@
-export interface CloudinaryImage {
+export interface ImageReference {
     public_id: string;
     url: string;
 }
 
-export interface CloudinaryAsset {
+export interface ImageAsset {
     public_id: string;
     url: string;
     resource_type: string;

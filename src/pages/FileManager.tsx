@@ -48,7 +48,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Session } from "@supabase/supabase-js";
-import { cloudinaryService, CLOUDINARY_FOLDERS } from "@/lib/cloudinaryService";
+import { imageService, IMAGE_FOLDERS } from "@/lib/imageService";
 
 interface FileManagerFile {
     id: string;
@@ -398,7 +398,7 @@ const FileManager = () => {
                     { fileName: "Uploading comparison...", progress: 20, status: "uploading" }
                 ]);
 
-                await cloudinaryService.uploadBeforeAfter(
+                await imageService.uploadBeforeAfter(
                     pendingBeforeFile,
                     pendingAfterFile,
                     {
@@ -421,17 +421,8 @@ const FileManager = () => {
                     );
 
                     try {
-                        const formData = new FormData();
-                        formData.append("file", file);
-                        formData.append("folder", selectedFolder === "gallery" ? CLOUDINARY_FOLDERS.GALLERY : selectedFolder);
-
-                        const { data, error } = await supabase.functions.invoke(
-                            "cloudinary-upload",
-                            { body: formData }
-                        );
-
-                        if (error) throw error;
-                        if (data?.error) throw new Error(data.error);
+                        const folder = selectedFolder === "gallery" ? IMAGE_FOLDERS.GALLERY : selectedFolder;
+                        const data = await imageService.uploadImage(file, folder);
 
                         setUploadProgress((prev) =>
                             prev.map((p, idx) =>
@@ -444,7 +435,7 @@ const FileManager = () => {
                                 .from("gallery")
                                 .insert({
                                     image_url: data.url,
-                                    public_id: data.public_id,
+                                    public_id: data.path,
                                     title: uploadTitle || file.name,
                                     description: uploadDescription || null,
                                     type: uploadType as any,
@@ -455,7 +446,7 @@ const FileManager = () => {
                                 .from("services")
                                 .insert({
                                     image_url: data.url,
-                                    public_id: data.public_id,
+                                    public_id: data.path,
                                     title: uploadTitle || file.name,
                                     description: uploadDescription || null,
                                     type: uploadType as any,
@@ -538,7 +529,7 @@ const FileManager = () => {
                 }
             }
 
-            await cloudinaryService.deleteItem(idToDelete, table, publicIds);
+            await imageService.deleteItem(idToDelete, table, publicIds);
 
             toast.success(`"${file.original_name || file.public_id}" deleted`);
             setShowDeleteConfirm(null);
@@ -636,7 +627,7 @@ const FileManager = () => {
                             <div>
                                 <h1 className="text-3xl font-bold">File Manager</h1>
                                 <p className="text-muted-foreground text-sm">
-                                    Upload to Cloudinary • CDN-optimized images & videos
+                                    Upload to Supabase Storage • Fast and reliable image storage
                                 </p>
                             </div>
                         </div>
@@ -752,7 +743,7 @@ const FileManager = () => {
                             <p className="text-muted-foreground">
                                 {searchTerm || activeTab !== "all"
                                     ? "No files match your filters"
-                                    : "No files yet. Upload your first file to Cloudinary."}
+                                    : "No files yet. Upload your first file to Supabase Storage."}
                             </p>
                         </Card>
                     ) : (

@@ -3,8 +3,8 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { Footer } from "@/components/Footer";
-import { cloudinaryService } from "@/lib/cloudinaryService";
-import { type GalleryItem } from "@/types/cloudinary";
+import { imageService } from "@/lib/imageService";
+import { type GalleryItem } from "@/types/image";
 import { Loader2 } from "lucide-react";
 
 type RoomType = "all" | "closet" | "kitchen" | "garage" | "other";
@@ -19,7 +19,7 @@ const Gallery = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const data = await cloudinaryService.fetchGallery();
+        const data = await imageService.fetchGallery();
         setProjects(data);
       } catch (error) {
         console.error("Error fetching gallery projects:", error);
