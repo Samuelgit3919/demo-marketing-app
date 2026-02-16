@@ -104,9 +104,8 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/admin`;
-
-      const { error } = await supabase.auth.signUp({
+      const redirectUrl = `${window.location.origin}/#/auth`;
+      const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
@@ -123,7 +122,7 @@ const Auth = () => {
         return;
       }
 
-      toast.success("Account created successfully! You can now login.");
+      toast.success("Account created! Please check your email to verify your account before logging in.");
       // Switch to login tab
       setLoginEmail(signupEmail);
     } catch (error: any) {
