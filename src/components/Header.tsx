@@ -26,7 +26,7 @@ export const Header = () => {
               <Home className="w-4 h-4" />
               <span className="hidden sm:inline">Home</span>
             </Button>
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate("/admin")}
@@ -34,7 +34,7 @@ export const Header = () => {
             >
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Admin</span>
-            </Button>
+            </Button> */}
           </nav>
         </div>
       </div>

@@ -13,7 +13,7 @@ export type { ServiceItem, BeforeAfterItem, SupabaseFile, GalleryItem, ImageAsse
 export const IMAGE_BUCKET = "images";
 
 export const IMAGE_FOLDERS = {
-  GALLERY: "gallery",
+  GALLERY: "gallery",  
   BEFORE_AFTER: "before-after",
   SERVICES: "service"
 } as const;

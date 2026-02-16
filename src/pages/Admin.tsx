@@ -119,6 +119,39 @@ const Admin = () => {
     }
   }, [isAdmin, session]);
 
+  // Auto-logout functionality
+  useEffect(() => {
+    if (!session) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleLogout("Logged out due to inactivity");
+      }, 60000); // 1 minute
+    };
+
+    // Events to detect activity
+    const events = ["mousedown", "mousemove", "keydown", "scroll", "touchstart"];
+
+    // Set up listeners
+    events.forEach(event => {
+      document.addEventListener(event, resetTimer);
+    });
+
+    // Initial timer
+    resetTimer();
+
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(event => {
+        document.removeEventListener(event, resetTimer);
+      });
+    };
+  }, [session]);
+
   const fetchSubmissions = async () => {
     try {
       const { data, error } = await supabase
@@ -189,11 +222,11 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (reason?: string) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      toast.success("Logged out successfully");
+      toast.success(reason || "Logged out successfully");
       navigate("/auth");
     } catch (error) {
       console.error("Error logging out:", error);

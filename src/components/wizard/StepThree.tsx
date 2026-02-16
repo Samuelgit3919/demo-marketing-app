@@ -79,14 +79,26 @@ export const StepThree = ({
 
     setSubmitting(true);
     try {
+      // Ensure bucket exists (best effort - may fail without admin rights)
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.find(b => b.name === "images");
+
+      if (!bucketExists) {
+        await supabase.storage.createBucket("images", {
+          public: true, // Assuming public for admin access/images
+          fileSizeLimit: 5242880, // 5MB
+          allowedMimeTypes: ["image/png", "image/jpeg", "application/pdf"],
+        }).catch(err => console.warn("Bucket creation failed (likely permissions):", err));
+      }
+
       // Upload files
       const fileUrls: string[] = [];
       for (const file of files) {
         const fileExt = file.name.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const filePath = `${formData.email}/${fileName}`;
+        const filePath = `submissions/${formData.email}/${fileName}`;
 
-        const { error } = await supabase.storage.from("submission-files").upload(filePath, file);
+        const { error } = await supabase.storage.from("images").upload(filePath, file);
 
         if (error) throw error;
         fileUrls.push(filePath);
@@ -101,8 +113,9 @@ export const StepThree = ({
         spaces,
         storage_priorities: storagePriorities,
         additional_notes: additionalNotes,
-        calendly_event_url: calendlyEventUrl,
-        calendly_booking_time: calendlyBookingTime,
+        meeting_link: calendlyEventUrl,
+        meeting_date: calendlyBookingTime,
+        meeting_platform: "Calendly",
         file_paths: fileUrls,
         status: "pending",
       });
@@ -135,9 +148,9 @@ export const StepThree = ({
 
       toast.success("Submission complete! Check your email for confirmation.");
       onComplete();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Submission failed. Please try again.");
+      toast.error(error.message || "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
