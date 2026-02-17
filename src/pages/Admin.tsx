@@ -289,7 +289,7 @@ const Admin = () => {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-2">
-             
+
               <Button onClick={() => navigate("/file-manager")} variant="outline">
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files

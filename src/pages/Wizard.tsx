@@ -5,8 +5,35 @@ import { StepTwo } from "@/components/wizard/StepTwo";
 import { StepThree } from "@/components/wizard/StepThree";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
+import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 
-const Wizard = () => {
+const LanguageToggle = () => {
+  const { language, setLanguage } = useLanguage();
+  return (
+    <div className="flex items-center gap-1 bg-muted rounded-full p-1">
+      <Button
+        variant={language === "en" ? "default" : "ghost"}
+        size="sm"
+        className="rounded-full px-3 h-7 text-xs font-semibold"
+        onClick={() => setLanguage("en")}
+      >
+        EN
+      </Button>
+      <Button
+        variant={language === "fr" ? "default" : "ghost"}
+        size="sm"
+        className="rounded-full px-3 h-7 text-xs font-semibold"
+        onClick={() => setLanguage("fr")}
+      >
+        FR
+      </Button>
+    </div>
+  );
+};
+
+const WizardContent = () => {
+  const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(() => {
     const saved = localStorage.getItem("wizardStep");
     return saved ? parseInt(saved) : 0;
@@ -40,28 +67,13 @@ const Wizard = () => {
   });
 
   // Auto-save to localStorage
-  useEffect(() => {
-    localStorage.setItem("wizardStep", currentStep.toString());
-  }, [currentStep]);
-
-  useEffect(() => {
-    localStorage.setItem("wizardFormData", JSON.stringify(formData));
-  }, [formData]);
-
-  useEffect(() => {
-    localStorage.setItem("wizardSpaces", JSON.stringify(spaces));
-  }, [spaces]);
-
-  useEffect(() => {
-    localStorage.setItem("wizardPriorities", JSON.stringify(storagePriorities));
-  }, [storagePriorities]);
-
-  useEffect(() => {
-    localStorage.setItem("wizardNotes", additionalNotes);
-  }, [additionalNotes]);
+  useEffect(() => { localStorage.setItem("wizardStep", currentStep.toString()); }, [currentStep]);
+  useEffect(() => { localStorage.setItem("wizardFormData", JSON.stringify(formData)); }, [formData]);
+  useEffect(() => { localStorage.setItem("wizardSpaces", JSON.stringify(spaces)); }, [spaces]);
+  useEffect(() => { localStorage.setItem("wizardPriorities", JSON.stringify(storagePriorities)); }, [storagePriorities]);
+  useEffect(() => { localStorage.setItem("wizardNotes", additionalNotes); }, [additionalNotes]);
 
   const handleComplete = () => {
-    // Clear localStorage on completion
     localStorage.removeItem("wizardStep");
     localStorage.removeItem("wizardFormData");
     localStorage.removeItem("wizardSpaces");
@@ -70,38 +82,16 @@ const Wizard = () => {
     window.location.href = "/";
   };
 
-  const canGoNext = () => {
-    if (currentStep === 0) {
-      // Validate Step 1: all fields required with proper format
-      const phoneDigits = formData.phone.replace(/[\s-]/g, '');
-      const validPhone = phoneDigits.length === 10 && /^\d+$/.test(phoneDigits);
-      const validPostal = formData.postalCode.length >= 5 && formData.postalCode.length <= 6;
-      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
-      return formData.fullName.trim() && validEmail && validPhone && validPostal;
-    }
-    if (currentStep === 1) {
-      // Validate Step 2: at least one space with required fields filled
-      if (spaces.length === 0) return false;
-
-      // Check each space has name, ceiling height, and all wall measurements
-      return spaces.every(space => {
-        const hasBasicInfo = space.name && space.ceilingHeight && parseFloat(space.ceilingHeight) > 0;
-        const hasWallMeasurements = space.wallMeasurements &&
-          space.wallMeasurements.length > 0 &&
-          space.wallMeasurements.every((wall: any) => wall.length && parseFloat(wall.length) > 0);
-        return hasBasicInfo && hasWallMeasurements;
-      });
-    }
-    return true;
-  };
-
   return (
     <>
       <Header />
       <div className="min-h-screen bg-background py-2 md:py-8 px-1 md:px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-6 md:mb-12 px-2">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">3-Step Space Planner</h1>
+            <div className="flex justify-end mb-4">
+              <LanguageToggle />
+            </div>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">{t("wizard.title")}</h1>
           </div>
 
           <ProgressBar currentStep={currentStep} totalSteps={3} />
@@ -147,5 +137,11 @@ const Wizard = () => {
     </>
   );
 };
+
+const Wizard = () => (
+  <LanguageProvider>
+    <WizardContent />
+  </LanguageProvider>
+);
 
 export default Wizard;
