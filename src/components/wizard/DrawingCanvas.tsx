@@ -44,7 +44,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
   const isRestoringRef = useRef(false);
   const wallLabelsRef = useRef<any[]>([]);
   const previousUnitRef = useRef<"cm" | "in">(unit);
-  const MAX_WALLS = 6;
+  const MAX_WALLS = 7;
 
   // Helper function to create a label at a relative position from shape center
   const createLabel = (text: string, offsetX: number, offsetY: number) => {
@@ -620,27 +620,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         ];
         break;
 
-      case "angle-5":
-        const anglePath5 = "M 0,0 L 80,0 L 100,20 L 100,100 L 0,100 Z";
-        shapeObj = new Path(anglePath5, {
-          left: -50,
-          top: -50,
-          stroke: "#1a1a1a",
-          strokeWidth: 3,
-          fill: "transparent",
-          shadow: wallShadow,
-        });
-        wallLengths = ["80", "28", "80", "100", "100"];
-        labelObjects = [
-          makeLabel(String.fromCharCode(65 + currentLabelIndex), -10, -60),
-          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 30, -40),
-          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 55, 5),
-          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 0, 55),
-          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), -60, 0),
-        ];
-        break;
 
-      case "angle-6":
         const anglePath6 = "M 0,0 L 0,80 L 20,100 L 100,100 L 100,0 Z";
         shapeObj = new Path(anglePath6, {
           left: -50,
@@ -873,9 +853,9 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
       {/* Shape Templates */}
       <div className="space-y-3">
-        <Label className="text-xs md:text-sm font-medium">L-Shape</Label>
+        {/* <Label className="text-xs md:text-sm font-medium">L-Shape</Label> */}
         <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
-          <button
+          {/* <button
             onClick={() => addShapeTemplate("rectangle")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer"
             title="Rectangle"
@@ -883,7 +863,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
             <svg width="50" height="40" viewBox="0 0 50 40" className="stroke-current stroke-2 fill-none">
               <rect x="2" y="2" width="46" height="36" />
             </svg>
-          </button>
+          </button> */}
           <button
             onClick={() => addShapeTemplate("lshape-1")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
@@ -911,19 +891,6 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               <path d="M 2,2 L 20,2 L 20,20 L 48,20 L 48,38 L 2,38 Z" />
             </svg>
           </button>
-          <button
-            onClick={() => addShapeTemplate("lshape-4")}
-            className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
-            title="L-Shape 4"
-          >
-            <svg width="50" height="40" viewBox="0 0 50 40" className="stroke-current stroke-2 fill-none">
-              <path d="M 12,20 L 30,20 L 30,2 L 48,2 L 48,38 L 12,38 Z" />
-            </svg>
-          </button>
-        </div>
-
-        <Label className="text-xs md:text-sm font-medium">Angle</Label>
-        <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
           <button
             onClick={() => addShapeTemplate("angle-1")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
@@ -960,6 +927,20 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               <path d="M 6,6 L 44,6 L 44,26 L 36,34 L 6,34 Z" />
             </svg>
           </button>
+          {/* <button
+            onClick={() => addShapeTemplate("lshape-4")}
+            className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
+            title="L-Shape 4"
+          >
+            <svg width="50" height="40" viewBox="0 0 50 40" className="stroke-current stroke-2 fill-none">
+              <path d="M 12,20 L 30,20 L 30,2 L 48,2 L 48,38 L 12,38 Z" />
+            </svg>
+          </button> */}
+        </div>
+
+        {/* <Label className="text-xs md:text-sm font-medium">Angle</Label> */}
+        {/* <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
+
           <button
             onClick={() => addShapeTemplate("angle-5")}
             className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale"
@@ -978,10 +959,10 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
               <path d="M 6,6 L 6,26 L 14,34 L 44,34 L 44,6 Z" />
             </svg>
           </button>
-        </div>
+        </div> */}
 
         {/* Clear and Undo buttons moved here - below angle shapes */}
-        <div className="flex gap-2 flex-wrap mt-3 justify-end">
+        <div className="flex relative top-[100%] left-50 right-50 z-50 gap-2 flex-wrap mt-3 justify-end">
           <Button onClick={handleUndo} variant="outline" size="sm" className="animate-pulse">
             <Undo className="w-4 h-4 md:mr-2" />
             <span className="hidden sm:inline">Undo</span>

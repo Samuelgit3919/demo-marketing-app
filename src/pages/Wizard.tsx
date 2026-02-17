@@ -101,7 +101,7 @@ const Wizard = () => {
       <div className="min-h-screen bg-background py-2 md:py-8 px-1 md:px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-6 md:mb-12 px-2">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">3 Steps Measurement Wizard</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">3-Step Space Planner</h1>
           </div>
 
           <ProgressBar currentStep={currentStep} totalSteps={3} />

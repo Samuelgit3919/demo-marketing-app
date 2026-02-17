@@ -82,14 +82,24 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
 
   // Validate on change and show inline errors
   const handleInputChange = (field: string, value: string) => {
+    // For phone, only allow numbers and limit to 10 digits
+    if (field === 'phone') {
+      const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 10);
+      setFormData({ ...formData, [field]: numbersOnly });
+
+      // Inline validation
+      const newErrors = { ...errors };
+      newErrors.phone = numbersOnly.length > 0 && numbersOnly.length !== 10 ? "Phone must be exactly 10 digits" : "";
+      setErrors(newErrors);
+      return;
+    }
+
     setFormData({ ...formData, [field]: value });
     const newErrors = { ...errors };
     if (field === 'fullName') {
       newErrors.fullName = value.trim().length > 0 && !validateName(value) ? "Name must be at least 2 characters" : "";
     } else if (field === 'email') {
       newErrors.email = value.trim().length > 0 && !validateEmail(value) ? "Enter a valid email (e.g. name@example.com)" : "";
-    } else if (field === 'phone') {
-      newErrors.phone = value.trim().length > 0 && !validatePhone(value) ? "Phone must be exactly 10 digits" : "";
     }
     setErrors(newErrors);
   };
