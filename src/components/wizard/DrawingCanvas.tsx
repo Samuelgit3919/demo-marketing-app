@@ -45,7 +45,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
   const isRestoringRef = useRef(false);
   const wallLabelsRef = useRef<any[]>([]);
   const previousUnitRef = useRef<"cm" | "in">(unit);
-  const MAX_WALLS = 6;
+  const MAX_WALLS = 7;
   const { t } = useLanguage();
 
   // createLabel helper

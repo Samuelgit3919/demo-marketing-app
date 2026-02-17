@@ -32,6 +32,15 @@ const LanguageToggle = () => {
   );
 };
 
+
+export interface UploadedFile {
+  file: File;
+  id: string;
+  preview: string;
+  uploadStatus: "pending" | "uploading" | "success" | "error";
+  filePath?: string;
+}
+
 const WizardContent = () => {
   const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(() => {
@@ -54,7 +63,7 @@ const WizardContent = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
 
   const [storagePriorities, setStoragePriorities] = useState<string[]>(() => {
     const saved = localStorage.getItem("wizardPriorities");
@@ -107,6 +116,7 @@ const WizardContent = () => {
 
             {currentStep === 1 && (
               <StepTwo
+                formData={formData}
                 spaces={spaces}
                 setSpaces={setSpaces}
                 files={files}
@@ -131,6 +141,7 @@ const WizardContent = () => {
                 onComplete={handleComplete}
               />
             )}
+
           </Card>
         </div>
       </div>

@@ -42,6 +42,7 @@ interface Submission {
   meeting_date: string | null;
   meeting_link: string | null;
   meeting_platform: string | null;
+  file_paths: string[] | null;
   status: string;
   created_at: string;
 }
@@ -431,19 +432,25 @@ const Admin = () => {
                           <Button
                             size="default"
                             className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                            onClick={() => window.open(submission.meeting_link!, '_blank')}
+                            onClick={() => {
+                              const link = submission.meeting_link || '';
+                              const targetUrl = link.includes('api.calendly.com')
+                                ? 'https://calendly.com/app/scheduled_events/user/me'
+                                : link;
+                              window.open(targetUrl, '_blank');
+                            }}
                           >
-                            Join Meeting
+                            {submission.meeting_link?.includes('api.calendly.com') ? 'Manage Meeting' : 'Join Meeting'}
                           </Button>
                           <div className="flex items-start gap-2">
                             <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Link:</span>
                             <a
-                              href={submission.meeting_link!}
+                              href={submission.meeting_link?.includes('api.calendly.com') ? 'https://calendly.com/app/scheduled_events/user/me' : submission.meeting_link!}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline break-all"
                             >
-                              {submission.meeting_link}
+                              {submission.meeting_link?.includes('api.calendly.com') ? 'View in Calendly Dashboard' : submission.meeting_link}
                             </a>
                           </div>
                         </div>
@@ -534,6 +541,36 @@ const Admin = () => {
                               {priority}
                             </Badge>
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Step 2 Uploaded Files */}
+                    {submission.file_paths && submission.file_paths.length > 0 && (
+                      <div>
+                        <p className="text-sm font-semibold mb-3">Allocated Files (Step 2)</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {submission.file_paths.map((path, index) => {
+                            const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(path);
+                            return (
+                              <div key={index} className="border rounded-lg overflow-hidden group relative">
+                                <img
+                                  src={publicUrl}
+                                  alt={`Upload ${index + 1}`}
+                                  className="w-full h-32 object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                  <Button
+                                    size="icon"
+                                    variant="secondary"
+                                    onClick={() => window.open(publicUrl, '_blank')}
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
