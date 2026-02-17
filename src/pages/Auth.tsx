@@ -116,6 +116,8 @@ const Auth = () => {
       if (error) {
         if (error.message.includes("already registered")) {
           toast.error("This email is already registered. Please login instead.");
+        } else if (error.message.includes("rate limit") || error.message.includes("Too many requests")) {
+          toast.error("Too many signup attempts. Please wait a while or try again later.");
         } else {
           toast.error(error.message);
         }
