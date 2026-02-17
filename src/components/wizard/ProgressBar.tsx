@@ -6,16 +6,14 @@ interface ProgressBarProps {
 }
 
 export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
-  const getStepColor = (step: number) => {
-    switch (step) {
+  const getStepColor = (index: number) => {
+    switch (index) {
       case 0: return "bg-red-500";
       case 1: return "bg-yellow-500";
       case 2: return "bg-green-500";
       default: return "bg-primary";
     }
   };
-
-  const activeColor = getStepColor(currentStep);
 
   return (
     <div className="w-full mb-12">
@@ -25,7 +23,7 @@ export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
             key={index}
             className={cn(
               "flex-1 h-2 rounded-full transition-all duration-500",
-              index <= currentStep ? activeColor : "bg-muted"
+              index <= currentStep ? getStepColor(index) : "bg-muted"
             )}
           />
         ))}

@@ -237,8 +237,8 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
   const addShapeTemplate = (shapeType: string) => {
     if (!fabricCanvas) return;
-    if (wallMeasurements.length >= MAX_WALLS) {
-      toast.error(t("canvas.maxWalls").replace("{max}", MAX_WALLS.toString()));
+    if (wallMeasurements.length > 0) {
+      toast.error(t("canvas.shapeExists"));
       return;
     }
 

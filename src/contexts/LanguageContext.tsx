@@ -115,6 +115,7 @@ const translations: Record<Language, Record<string, string>> = {
         "canvas.canvasCleared": "Canvas cleared!",
         "canvas.undoSuccess": "Undo successful!",
         "canvas.templateAdded": "template with {count} wall(s) added!",
+        "canvas.shapeExists": "A shape already exists. Please clear the canvas to add a new one.",
 
         // Navigation
         "nav.next": "Next",
@@ -226,6 +227,7 @@ const translations: Record<Language, Record<string, string>> = {
         "canvas.canvasCleared": "Plan effacé !",
         "canvas.undoSuccess": "Annulation réussie !",
         "canvas.templateAdded": "modèle de {count} mur(s) ajouté !",
+        "canvas.shapeExists": "Une forme existe déjà. Veuillez effacer le canevas pour en ajouter une nouvelle.",
 
         // Navigation
         "nav.next": "Suivant",
