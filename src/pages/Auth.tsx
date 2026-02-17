@@ -104,7 +104,7 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/#/auth`;
+      const redirectUrl = `https://demo-marketing-app-zg41.vercel.app/#/auth`;
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,

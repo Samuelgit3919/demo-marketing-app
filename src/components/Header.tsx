@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Home, LayoutDashboard } from "lucide-react";
+import { Home, LayoutDashboard, Menu, Upload, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -17,14 +25,45 @@ export const Header = () => {
           </div>
 
           <nav className="flex items-center gap-2">
+            {/* Mobile Actions */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/")}>
+                    <Home className="w-4 h-4 mr-2" />
+                    Home
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/file-manager")}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Files
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => {
+                    supabase.auth.signOut().then(() => {
+                      toast.success("Logged out successfully");
+                      navigate("/auth");
+                    });
+                  }}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Desktop Home Button (Optional to keep or remove based on request) */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate("/")}
-              className="gap-2"
+              className="gap-2 hidden md:inline-flex"
             >
               <Home className="w-4 h-4" />
-              <span className="hidden sm:inline">Home</span>
+              <span>Home</span>
             </Button>
 
           </nav>

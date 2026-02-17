@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Header } from "@/components/Header";
-import { Search, Download, LogOut, Loader2, Upload, Trash2 } from "lucide-react";
+import { Search, Download, LogOut, Loader2, Upload, Trash2, Menu, Home } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Session } from "@supabase/supabase-js";
 
 interface Submission {
@@ -277,10 +283,16 @@ const Admin = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+              <h1 className="text-2xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
               <p className="text-muted-foreground">Review and manage client submissions</p>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-2">
+              <Button onClick={() => navigate("/")} variant="outline" size="sm">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
               <Button onClick={() => navigate("/file-manager")} variant="outline">
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
@@ -290,6 +302,8 @@ const Admin = () => {
                 Logout
               </Button>
             </div>
+
+            {/* Mobile Actions - Moved to Header */}
           </div>
 
           {/* Filters */}
