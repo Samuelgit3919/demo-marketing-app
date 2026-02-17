@@ -256,6 +256,19 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
     };
 
     switch (shapeType) {
+      case "u-shape":
+        // Walk-in closet with gap
+        // Path: Start Inner A(30,60) -> Corner A/B(0,60) -> Corner B/C(0,0) -> Corner C/D(100,0) -> Corner D/E(100,60) -> Inner E(70,60)
+        shapeObj = new Path("M 30,60 L 0,60 L 0,0 L 100,0 L 100,60 L 70,60", { left: -50, top: -30, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
+        wallLengths = ["30", "60", "100", "60", "30"];
+        labelObjects = [
+          makeLabel(String.fromCharCode(65 + currentLabelIndex), -35, 45),   // A (Bottom Left)
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -70, 0), // B (Left)
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 2), 0, -50), // C (Top)
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 3), 70, 0),// D (Right)
+          makeLabel(String.fromCharCode(65 + currentLabelIndex + 4), 35, 45), // E (Bottom Right)
+        ];
+        break;
       case "rectangle":
         shapeObj = new Rect({ left: -75, top: -50, width: 150, height: 100, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
         wallLengths = ["150", "100", "150", "100"];
@@ -515,6 +528,9 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
 
         <div className="flex flex-wrap gap-2 p-3 md:p-4 bg-card border rounded-lg">
 
+          <button onClick={() => addShapeTemplate("u-shape")} className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale" title="Walk-in Closet">
+            <svg width="50" height="40" viewBox="0 0 50 40" className="stroke-current stroke-2 fill-none"><path d="M 15,30 L 0,30 L 0,0 L 50,0 L 50,30 L 35,30" /></svg>
+          </button>
           <button onClick={() => addShapeTemplate("lshape-1")} className="p-3 md:p-4 border-2 border-border hover:border-primary hover:bg-primary/10 rounded-lg transition-all cursor-pointer hover-scale" title="L-Shape 1">
             <svg width="50" height="40" viewBox="0 0 50 40" className="stroke-current stroke-2 fill-none"><path d="M 2,2 L 38,2 L 38,20 L 20,20 L 20,38 L 2,38 Z" /></svg>
           </button>
