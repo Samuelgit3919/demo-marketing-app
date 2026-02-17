@@ -48,6 +48,7 @@ export const StepThree = ({
   // Prevent hydration mismatch
   useEffect(() => {
     setIsClient(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Listen to Calendly event (official & reliable way)

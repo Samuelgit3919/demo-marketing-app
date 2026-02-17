@@ -408,7 +408,7 @@ export const StepTwo = ({
             </Card>
           )}
 
-          <Card className="p-4 md:p-6">
+          <Card className="p-4 md:p-6 border-black/25">
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-base md:text-lg mb-2">{t("step2.photosTitle")}</h3>
@@ -489,7 +489,7 @@ export const StepTwo = ({
             </div>
           </Card>
 
-          <Card className="p-4 md:p-6">
+          <Card className="p-4 md:p-6 border-black/25">
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-base md:text-lg mb-2">{t("step2.storagePriorities")}</h3>
@@ -519,6 +519,7 @@ export const StepTwo = ({
             <Label htmlFor="notes">{t("step2.additionalNotes")}</Label>
             <Textarea
               id="notes"
+              className="border-black/25"
               value={additionalNotes}
               onChange={(e) => setAdditionalNotes(e.target.value)}
               placeholder={t("step2.notesPlaceholder")}
