@@ -224,13 +224,18 @@ export const StepTwo = ({
         return false;
       }
 
+      // If drawing data exists, ensure wall measurements are valid
       if (space.wallMeasurements && space.wallMeasurements.length > 0) {
         for (const wall of space.wallMeasurements) {
+          // Check for empty string or invalid number
+          if (!wall.length || wall.length.trim() === "") return false;
+
           const length = parseFloat(wall.length);
-          if (!wall.length || wall.length.trim() === "" || !length || length <= 0) {
-            return false;
-          }
+          if (isNaN(length) || length <= 0) return false;
         }
+      } else {
+        // Space added but no shape/design selected yet -> Invalid
+        return false;
       }
     }
 
@@ -268,6 +273,9 @@ export const StepTwo = ({
             return;
           }
         }
+      } else {
+        toast.error(`Please add a design/shape for "${space.name}"`);
+        return;
       }
     }
 

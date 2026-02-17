@@ -260,7 +260,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         // Walk-in closet with gap
         // Path: Start Inner A(30,60) -> Corner A/B(0,60) -> Corner B/C(0,0) -> Corner C/D(100,0) -> Corner D/E(100,60) -> Inner E(70,60)
         shapeObj = new Path("M 30,60 L 0,60 L 0,0 L 100,0 L 100,60 L 70,60", { left: -50, top: -30, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["30", "60", "100", "60", "30"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -35, 45),   // A (Bottom Left)
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -70, 0), // B (Left)
@@ -271,7 +271,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "rectangle":
         shapeObj = new Rect({ left: -75, top: -50, width: 150, height: 100, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["150", "100", "150", "100"];
+        wallLengths = ["", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), 0, -58),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 83, 0),
@@ -281,7 +281,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "lshape-1":
         shapeObj = new Path("M 0,0 L 100,0 L 100,60 L 60,60 L 60,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["100", "60", "40", "40", "60", "100"];
+        wallLengths = ["", "", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), 0, -60),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 55, -20),
@@ -293,7 +293,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "lshape-2":
         shapeObj = new Path("M 0,60 L 40,60 L 40,0 L 100,0 L 100,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["40", "60", "100", "100", "40", "60"];
+        wallLengths = ["", "", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -30, 5),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -10, -20),
@@ -305,7 +305,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "lshape-3":
         shapeObj = new Path("M 0,0 L 60,0 L 60,40 L 100,40 L 100,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["60", "40", "40", "60", "100", "100"];
+        wallLengths = ["", "", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -20, -60),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 10, -30),
@@ -317,7 +317,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "lshape-4":
         shapeObj = new Path("M 0,40 L 40,40 L 40,0 L 100,0 L 100,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["40", "40", "60", "100", "100", "60"];
+        wallLengths = ["", "", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -30, -10),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -10, -30),
@@ -329,7 +329,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "angle-1":
         shapeObj = new Path("M 0,100 L 0,20 L 20,0 L 100,0 L 100,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["80", "28", "80", "100", "100"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -60, 5),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -30, -40),
@@ -340,7 +340,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "angle-2":
         shapeObj = new Path("M 0,0 L 0,80 L 20,100 L 100,100 L 100,0 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["80", "28", "80", "100", "100"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -60, -5),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -30, 40),
@@ -351,7 +351,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "angle-3":
         shapeObj = new Path("M 0,0 L 80,0 L 100,20 L 100,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["80", "28", "80", "100", "100"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -10, -60),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 30, -40),
@@ -362,7 +362,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "angle-4":
         shapeObj = new Path("M 0,0 L 100,0 L 100,80 L 80,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["100", "80", "28", "80", "100"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), 0, -60),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 55, -5),
@@ -373,7 +373,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "angle-5":
         shapeObj = new Path("M 0,0 L 80,0 L 100,20 L 100,100 L 0,100 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["80", "28", "80", "100", "100"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -10, -60),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), 30, -40),
@@ -384,7 +384,7 @@ export const DrawingCanvas = ({ onDrawingComplete, spaceId, unit }: DrawingCanva
         break;
       case "angle-6":
         shapeObj = new Path("M 0,0 L 0,80 L 20,100 L 100,100 L 100,0 Z", { left: -50, top: -50, stroke: "#1a1a1a", strokeWidth: 3, fill: "transparent", shadow: wallShadow });
-        wallLengths = ["80", "28", "80", "100", "100"];
+        wallLengths = ["", "", "", "", ""];
         labelObjects = [
           makeLabel(String.fromCharCode(65 + currentLabelIndex), -60, -5),
           makeLabel(String.fromCharCode(65 + currentLabelIndex + 1), -30, 40),
