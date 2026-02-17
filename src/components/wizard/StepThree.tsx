@@ -152,7 +152,7 @@ export const StepThree = ({
   };
 
   // Calendly URL with prefill
-  const calendlyUrl = `https://calendly.com/samishambu39/30min`;
+  const calendlyUrl = `https://calendly.com/designandsupply/30min`;
 
   return (
     <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
