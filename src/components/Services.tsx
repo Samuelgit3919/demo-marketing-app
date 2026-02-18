@@ -131,15 +131,13 @@ export const Services = () => {
     <section
       id="services"
       ref={elementRef as React.RefObject<HTMLElement>}
-      className={`py-24 bg-background transition-all duration-1000 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      }`}
+      className={`py-24 bg-background transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className={`text-center mb-16 transition-all duration-700 delay-200 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+          className={`text-center mb-16 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
         >
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Our <span className="text-accent">Services</span>
@@ -188,11 +186,10 @@ export const Services = () => {
                 <div
                   key={index}
                   onClick={() => setSelectedService(index)}
-                  className={`relative h-[188px] overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${
-                    selectedService === index
-                      ? "ring-4 ring-accent shadow-large scale-105"
-                      : "hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100"
-                  }`}
+                  className={`relative h-[188px] overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${selectedService === index
+                    ? "ring-4 ring-accent shadow-large scale-105"
+                    : "hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100"
+                    }`}
                 >
                   <img
                     src={service.image}
@@ -215,11 +212,10 @@ export const Services = () => {
                 <div
                   key={index}
                   onClick={() => setSelectedService(index)}
-                  className={`relative flex-shrink-0 w-32 sm:w-40 h-32 sm:h-40 overflow-hidden rounded-lg cursor-pointer transition-all duration-300 snap-start ${
-                    selectedService === index
-                      ? "ring-3 ring-accent shadow-large scale-105"
-                      : "opacity-70 hover:opacity-100 active:scale-95"
-                  }`}
+                  className={`relative flex-shrink-0 w-32 sm:w-40 h-32 sm:h-40 overflow-hidden rounded-lg cursor-pointer transition-all duration-300 snap-start ${selectedService === index
+                    ? "ring-3 ring-accent shadow-large scale-105"
+                    : "opacity-70 hover:opacity-100 active:scale-95"
+                    }`}
                 >
                   <img
                     src={service.image}
@@ -242,11 +238,10 @@ export const Services = () => {
                 <div
                   key={index + 3}
                   onClick={() => setSelectedService(index + 3)}
-                  className={`relative h-56 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${
-                    selectedService === index + 3
-                      ? "ring-4 ring-accent shadow-large scale-105"
-                      : "hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100"
-                  }`}
+                  className={`relative h-56 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${selectedService === index + 3
+                    ? "ring-4 ring-accent shadow-large scale-105"
+                    : "hover:scale-105 hover:shadow-medium opacity-80 hover:opacity-100"
+                    }`}
                 >
                   <img
                     src={service.image}

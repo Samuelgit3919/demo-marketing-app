@@ -11,9 +11,11 @@ import NotFound from "./pages/NotFound";
 import HowItWorks from "./pages/HowItWorks";
 import AboutUs from "./pages/AboutUs";
 import Gallery from "./pages/Gallery";
+import ServiceDetail from "./pages/ServiceDetail";
 import { useEffect } from "react";
 import FileManager from "./pages/FileManager";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { PromoPopup } from "@/components/PromoPopup";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PromoPopup />
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
@@ -49,6 +52,7 @@ const App = () => (
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/gallery" element={<Gallery />} />
+          {/* <Route path="/gallery/:slug" element={<ServiceDetail />} /> */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
