@@ -52,8 +52,7 @@ const App = () => (
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/gallery" element={<Gallery />} />
-          {/* <Route path="/gallery/:slug" element={<ServiceDetail />} /> */}
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                                
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
