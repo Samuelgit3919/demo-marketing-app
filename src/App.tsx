@@ -51,8 +51,7 @@ const App = () => (
 
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/gallery" element={<Gallery />} />
-                                
+          <Route path="/gallery" element={<Gallery />} />                         
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
