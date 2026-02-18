@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import FileManager from "./pages/FileManager";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PromoPopup } from "@/components/PromoPopup";
+import GalleryDetailPage from "./pages/GalleryDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +52,8 @@ const App = () => (
 
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/gallery" element={<Gallery />} />                         
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/gallery/:id" element={<GalleryDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
