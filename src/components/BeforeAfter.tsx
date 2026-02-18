@@ -69,7 +69,7 @@ export const BeforeAfter = () => {
     },
     [Autoplay({ delay: 3000, stopOnInteraction: true })]
   );
-  
+
   const [projects, setProjects] = useState<ProjectItem[]>(DEFAULT_PROJECTS);
   const [activeProject, setActiveProject] = useState<ProjectItem>(DEFAULT_PROJECTS[0]);
   const [loading, setLoading] = useState(true);
@@ -320,12 +320,12 @@ export const BeforeAfter = () => {
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-500"></div>
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-500">
-                      <div className="bg-gradient-to-r from-white via-white to-white/95 backdrop-blur-md text-foreground px-7 py-3.5 rounded-full font-bold text-sm shadow-elegant transform translate-y-4 group-hover/card:translate-y-0 transition-all duration-500 border border-accent/20">
+                      <div className="bg-gradient-to-r from-white via-white to-white/95 backdrop-blur-md text-foreground px-7 py-3.5 font-bold text-sm shadow-elegant transform translate-y-4 group-hover/card:translate-y-0 transition-all duration-500 border border-accent/20">
                         View Project →
                       </div>
                     </div>
                     {activeProject?.id === project.id && (
-                      <div className="absolute top-4 right-4 bg-gradient-to-br from-accent to-accent/90 text-white px-4 py-2 rounded-full text-xs font-bold shadow-elegant animate-fade-in border border-white/20">
+                      <div className="absolute top-4 right-4 bg-gradient-to-br from-accent to-accent/90 text-white px-4 py-2 text-xs font-bold shadow-elegant animate-fade-in border border-white/20">
                         ACTIVE
                       </div>
                     )}

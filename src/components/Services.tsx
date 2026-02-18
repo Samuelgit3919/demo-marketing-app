@@ -86,7 +86,7 @@ export const Services = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {/* Main Image Display */}
             <div className="lg:col-span-2">
-              <div className="relative h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden rounded-xl md:rounded-2xl group cursor-pointer" onClick={() => handleServiceClick(selectedService)}>
+              <div className="relative h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden group cursor-pointer" onClick={() => handleServiceClick(selectedService)}>
                 <img
                   src={services[selectedService].image}
                   alt={services[selectedService].title}
@@ -144,8 +144,8 @@ export const Services = () => {
                 <div
                   key={index}
                   onClick={() => setSelectedService(index)}
-                  className={`relative flex-shrink-0 w-32 sm:w-40 h-32 sm:h-40 overflow-hidden rounded-lg cursor-pointer transition-all duration-300 snap-start ${selectedService === index
-                    ? 'ring-3 ring-accent shadow-large scale-105'
+                  className={`relative flex-shrink-0 w-32 sm:w-40 h-32 sm:h-40 overflow-hidden cursor-pointer transition-all duration-300 snap-start ${selectedService === index
+                    ? 'ring-4 ring-accent shadow-large scale-105'
                     : 'opacity-70 hover:opacity-100 active:scale-95'
                     }`}
                 >
